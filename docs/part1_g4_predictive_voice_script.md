@@ -1,0 +1,113 @@
+# Part 1 G4 - Predictive Attribution Voice Script
+
+Mục tiêu đọc: khoảng 5 phút với voice tự nhiên; duration chính xác sẽ được chốt sau khi bạn gửi audio. Nếu tăng speed trong CapCut lên khoảng 1.15, đoạn này thường sẽ ngắn hơn khoảng 13%.
+
+Giữ nguyên các thuật ngữ: `Predictive Attribution`, `training data`, `model behavior`, `counterfactual`, `subset indicator`, `datamodel`, `surrogate`, `sensitivity`, `amortize cost`.
+
+Khuyến nghị tạo audio thành các file:
+
+- `g4_00.mp3` - Mở lens predictive
+- `g4_01.mp3` - Counterfactual question
+- `g4_02.mp3` - Training subsets và subset indicator
+- `g4_03.mp3` - Datamodel như surrogate
+- `g4_04.mp3` - Attribution là sensitivity
+- `g4_05.mp3` - Scale và evaluation
+- `g4_06.mp3` - Recap Part I và chuyển sang Part II
+
+## g4_00 - Mở lens predictive
+
+Ở phần game-theoretic attribution, ta hỏi: nếu nhiều data point cùng tạo ra một utility, thì credit nên được chia thế nào?
+
+Bây giờ ta đổi lens thêm một lần nữa.
+
+Predictive Attribution không bắt đầu từ câu hỏi ai xứng đáng nhận credit. Nó bắt đầu từ một câu hỏi thực dụng hơn:
+
+Nếu training data thay đổi, model behavior sẽ thay đổi như thế nào?
+
+Ví dụ, nếu bỏ một nhóm data ra khỏi training set, accuracy sẽ giảm mạnh, tăng nhẹ, hay gần như không đổi? Nếu thêm một loại dữ liệu mới vào, model có bớt hallucinate không, có công bằng hơn không?
+
+Nói ngắn gọn, predictive attribution xem dữ liệu như một nút điều khiển. Khi nút đó bật, tắt, hoặc đổi trọng số, ta muốn dự đoán behavior của model sẽ dịch chuyển ra sao.
+
+## g4_01 - Counterfactual question
+
+Từ khóa ở đây là `counterfactual`.
+
+Ta không chỉ nhìn model hiện tại rồi giải thích nó bằng một score nghe có vẻ hợp lý. Ta hỏi về một thế giới khác: nếu training data không giống như ban đầu, thì điều gì sẽ xảy ra?
+
+Trong lý tưởng, ta có thể train lại model nhiều lần. Một lần giữ nguyên data. Một lần bỏ data point i. Một lần bỏ cả một subset. Một lần tăng trọng số cho một nhóm dữ liệu. Sau đó ta so sánh behavior giữa các lần train.
+
+Nhưng với modern machine learning, cách này quá đắt. Train lại model lớn chỉ để trả lời một câu hỏi nhỏ gần như không khả thi.
+
+Vì vậy predictive attribution cần một ý tưởng khác: học một mô hình phụ có thể dự đoán counterfactual behavior mà không cần train lại model chính mỗi lần.
+
+## g4_02 - Training subsets và subset indicator
+
+Cách trực quan nhất là tạo ra nhiều training subsets.
+
+Với mỗi subset, ta train hoặc fine-tune model, rồi đo behavior của nó trên validation set, benchmark, hoặc một nhóm prompt quan trọng.
+
+Mỗi subset được biểu diễn bằng một `subset indicator`: một vector gồm không và một. Data point nào được giữ lại thì vị trí tương ứng là một. Data point nào bị bỏ ra thì vị trí đó là không.
+
+Khi đó, mỗi thí nghiệm tạo ra một cặp dữ liệu mới: subset indicator ở đầu vào, và model behavior ở đầu ra.
+
+Ví dụ, vector này có thể dẫn đến accuracy 0.82. Vector khác có thể dẫn đến accuracy 0.76. Một vector khác nữa có thể làm loss giảm, nhưng performance trên edge cases lại tệ hơn.
+
+Ta đang học một bản đồ: cấu trúc của training subset liên hệ thế nào với behavior của model.
+
+## g4_03 - Datamodel như surrogate
+
+Bản đồ đó thường được gọi là một `datamodel`.
+
+Datamodel không phải model chính mà ta deploy. Nó là một `surrogate`: một mô hình phụ học quan hệ giữa dữ liệu huấn luyện và behavior của model chính.
+
+Đầu vào của datamodel là subset indicator. Đầu ra là behavior mà ta dự đoán model chính sẽ có nếu được train trên subset đó.
+
+Nếu datamodel học tốt, ta có thể đặt câu hỏi counterfactual nhanh hơn nhiều.
+
+Thay vì thật sự train lại model chính khi bỏ data point i, ta đưa một vector mới vào datamodel: giống vector ban đầu, nhưng vị trí của i được tắt đi.
+
+Datamodel dự đoán behavior mới. Sự khác biệt giữa behavior trước và sau khi tắt i cho ta một tín hiệu attribution.
+
+Đây là lý do predictive attribution không chỉ là “gán điểm cho data”. Nó là một bài toán prediction: dự đoán model sẽ phản ứng thế nào khi dữ liệu thay đổi.
+
+## g4_04 - Attribution là sensitivity
+
+Khi đã có datamodel, attribution có thể được hiểu như `sensitivity`.
+
+Nếu thay đổi một data point làm prediction của datamodel đổi nhiều, data point đó có ảnh hưởng lớn đến behavior đang xét.
+
+Nếu bật hoặc tắt data point đó gần như không làm prediction đổi, attribution của nó nhỏ.
+
+Với một datamodel đơn giản, ví dụ mô hình tuyến tính, sensitivity có thể nhìn giống coefficient của từng data point.
+
+Nhưng ý nghĩa của score luôn phụ thuộc vào behavior mà ta chọn đo. Một data point có thể giúp accuracy tổng thể, nhưng làm tệ hơn trên một nhóm dữ liệu nhạy cảm. Một data point khác có thể không tăng accuracy nhiều, nhưng lại quan trọng cho robustness.
+
+Vì vậy trong predictive attribution, câu hỏi đầu tiên luôn là: ta đang muốn dự đoán behavior nào?
+
+## g4_05 - Scale và evaluation
+
+Điểm mạnh của predictive attribution là nó có thể `amortize cost`.
+
+Ta trả một chi phí lớn ban đầu để tạo nhiều training subsets, đo behavior, rồi học datamodel. Sau đó, khi có nhiều câu hỏi mới, ta không nhất thiết phải train lại model chính từ đầu. Ta dùng datamodel để dự đoán nhanh hơn.
+
+Đổi lại, predictive attribution có một yêu cầu rất rõ: phải kiểm tra khả năng dự đoán counterfactual.
+
+Nếu datamodel nói rằng bỏ một subset sẽ làm accuracy giảm 5 phần trăm, nhưng khi thật sự retrain thì accuracy gần như không đổi, attribution từ datamodel đó chưa đáng tin.
+
+Nói cách khác, với lens predictive, một score đẹp chưa đủ. Score phải giúp dự đoán đúng behavior trong những tình huống chưa thấy.
+
+Đây là điểm sẽ nối trực tiếp sang các phần sau: theory, datamodels, scaling, và evaluation.
+
+## g4_06 - Recap Part I và chuyển sang Part II
+
+Đến đây, ta có ba lens chính cho data attribution.
+
+Corroborative attribution hỏi: output này được hỗ trợ bởi evidence nào?
+
+Game-theoretic attribution hỏi: utility chung nên được chia credit cho data point như thế nào?
+
+Predictive attribution hỏi: nếu training data thay đổi, model behavior sẽ thay đổi ra sao?
+
+Ba lens này không cạnh tranh nhau. Chúng trả lời ba loại câu hỏi khác nhau: evidence, credit, và counterfactual prediction.
+
+Phần tiếp theo sẽ đi sâu hơn vào nền tảng: M-estimation, leave-one-out, influence functions, và datamodels. Đó là nơi ta bắt đầu biến những trực giác này thành công cụ có thể tính toán ở scale lớn.

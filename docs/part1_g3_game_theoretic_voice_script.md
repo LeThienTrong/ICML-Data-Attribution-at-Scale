@@ -1,0 +1,93 @@
+# Part 1 G3 - Game-theoretic Attribution Voice Script
+
+Mục tiêu đọc: khoảng 5 phút 04 giây theo các file audio hiện có. Video không embed audio; tạo voice bằng ElevenLabs rồi ghép thủ công trong CapCut.
+
+Audio hiện có: `g3_00`, `g3_01`, `g3_02`, `g3_04`, `g3_05`, `g3_06`, `g3_07`. Hiện chưa thấy file `g3_03.mp3`; đoạn context đang được khớp với `g3_04.mp3`.
+
+Giữ nguyên các thuật ngữ: `credit`, `utility`, `cooperative game`, `coalition`, `marginal contribution`, `Shapley value`, `sampling`, `approximation`.
+
+## 00:00-00:50 - Từ evidence sang credit
+
+Sau corroborative attribution, ta chuyển sang một kiểu câu hỏi khác.
+
+Ở phần trước, ta hỏi: output này được hỗ trợ bởi evidence nào? Nói cách khác, ta đi từ output về những nguồn có thể làm output đáng tin hơn.
+
+Nhưng có nhiều tình huống mà câu hỏi evidence là chưa đủ. Nếu một dataset giúp model tăng accuracy, nếu một nhóm dữ liệu làm loss giảm xuống, hoặc nếu dữ liệu huấn luyện tạo ra giá trị kinh doanh, ta muốn hỏi một câu khác: phần `credit` đó nên được chia cho các data point như thế nào?
+
+Đây là trực giác của `game-theoretic attribution`: xem dữ liệu như những thành phần cùng đóng góp vào một kết quả chung, rồi tìm một cách phân bổ credit có nguyên tắc hơn là chỉ nhìn bằng cảm giác.
+
+## 00:50-01:34 - Data point như người chơi
+
+Trong game-theoretic attribution, mỗi data point được xem như một player trong một `cooperative game`.
+
+Một nhóm player hợp tác với nhau tạo thành một `coalition`, ký hiệu là S.
+
+Sau đó ta gán cho coalition này một giá trị, gọi là `utility`, thường viết là v của S.
+
+Utility có thể là accuracy trên validation set, có thể là negative loss, có thể là doanh thu, hoặc bất kỳ đại lượng nào nói rằng model đang tốt lên theo tiêu chí của ứng dụng.
+
+Điểm quan trọng là: game không hỏi data point trông giống output đến mức nào. Game hỏi data point đó đóng góp bao nhiêu vào utility chung.
+
+## 01:34-02:19 - Marginal contribution
+
+Credit của một data point không nên được đo riêng lẻ.
+
+Ta đo nó bằng `marginal contribution`: nếu đã có một coalition S, rồi ta thêm data point i vào, utility tăng thêm bao nhiêu?
+
+Nói bằng công thức, delta của i trong context S bằng v của S hợp với i, trừ đi v của S.
+
+Nếu utility tăng nhiều, i có contribution lớn trong context đó. Nếu utility gần như không đổi, contribution của i trong context đó nhỏ.
+
+Cách nghĩ này rất tự nhiên. Một ví dụ huấn luyện chỉ có giá trị khi ta biết nó đang được thêm vào tập dữ liệu nào. Một điểm dữ liệu hiếm có thể rất quan trọng trong một dataset thiếu ví dụ tương tự, nhưng ít quan trọng hơn trong một dataset đã rất dư thừa.
+
+## 02:19-03:01 - Context matters
+
+Đây là điểm dễ gây nhầm nhất.
+
+Cùng một data point có thể rất quan trọng trong context này, nhưng gần như dư thừa trong context khác.
+
+Nếu coalition hiện tại còn thiếu loại ví dụ mà i cung cấp, thêm i vào có thể làm utility tăng mạnh.
+
+Nhưng nếu coalition đã có nhiều ví dụ rất giống i, thì thêm i vào chỉ làm utility tăng một chút, hoặc thậm chí không tăng.
+
+Vì vậy, credit không phải là một nhãn cố định dán lên data point. Credit phụ thuộc vào coalition xung quanh nó.
+
+Nói ngắn gọn: muốn nói một data point có giá trị bao nhiêu, ta phải nói giá trị đó được đo trong bối cảnh nào.
+
+## 03:01-03:57 - Shapley value
+
+Vậy ta nên chọn context nào để đo contribution?
+
+`Shapley value` trả lời bằng một ý tưởng rất đẹp: đừng chọn một context duy nhất.
+
+Ta tưởng tượng data point được thêm vào theo nhiều thứ tự khác nhau. Ở mỗi thứ tự, khi đến lượt i xuất hiện, ta đo marginal contribution của i tại thời điểm đó.
+
+Nếu i xuất hiện sớm, nó có thể đóng góp rất nhiều vì coalition trước nó còn nhỏ. Nếu i xuất hiện muộn, contribution có thể thấp hơn vì nhiều data khác đã giải quyết phần việc tương tự.
+
+Sau đó, ta lấy trung bình các contribution này qua nhiều thứ tự.
+
+Kết quả là một credit score có tính đối xứng hơn: nếu hai data point đóng vai trò giống nhau, chúng nhận credit giống nhau; nếu một điểm không bao giờ giúp utility, credit của nó gần bằng không.
+
+Đó là lý do Shapley value thường được xem như một chuẩn lý tưởng cho việc chia credit.
+
+## 03:57-04:29 - Scale
+
+Vấn đề là scale.
+
+Để tính Shapley value chính xác, về mặt lý tưởng ta phải xét rất nhiều coalition, gần như mọi cách data point có thể xuất hiện trước hoặc sau nhau.
+
+Với n data point, số coalition tăng theo hai mũ n.
+
+Khi n bằng bốn, ta còn có thể nhìn được toàn bộ. Nhưng khi n là một triệu, brute force là bất khả thi.
+
+Vì vậy trong thực tế, game-theoretic attribution thường cần `sampling`, `approximation`, hoặc các estimator đặc biệt để ước lượng credit mà không thử mọi coalition.
+
+## 04:29-05:04 - Recap và chuyển tiếp
+
+Tóm lại, game-theoretic attribution trả lời câu hỏi: credit nên được phân bổ như thế nào?
+
+Công cụ trung tâm là marginal contribution. Chuẩn lý tưởng thường là Shapley value. Nhưng khi đi lên scale lớn, ta phải chấp nhận approximation.
+
+Lens này khác với corroborative attribution. Nó không hỏi nguồn nào hỗ trợ output, mà hỏi dữ liệu đóng góp bao nhiêu vào utility.
+
+Tiếp theo, ta chuyển sang lens thứ ba: `Predictive Attribution`, nơi câu hỏi không còn là chia credit, mà là dự đoán model sẽ thay đổi thế nào nếu training data thay đổi.

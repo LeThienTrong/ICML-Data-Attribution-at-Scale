@@ -1,0 +1,258 @@
+In Part I, we had three lenses for data attribution.
+Corroborative attribution asks: what evidence supports this output?
+Game-theoretic attribution asks: if many data points create one utility,
+how should credit be divided?
+Predictive attribution asks a different question: if training data changes,
+how will model behavior change?
+Part II starts from this third question.
+The reason is that without theory,
+an attribution score can easily become a plausible-sounding number that is hard to verify.
+We can say a data point is "important", but important in what sense?
+Does it reduce loss?
+Does it flip the label of a test example?
+Does it improve overall accuracy, or only help a small data group?
+And if we actually remove it from the training set, does that prediction happen?
+So in this part, we will turn intuition into a clearer problem:
+how training data enters the learning algorithm, what changing data means,
+and how to predict counterfactual behavior without too much retraining from scratch
+times.
+One notable point is: this theory does not start from deep learning.
+It has a fairly old statistical analog.
+In statistics, people have long cared about the question: if a dataset changes slightly,
+how will the estimator change?
+For example, if we remove one observation from regression, do coefficients change much?
+If we increase the weight of a sample, does the estimate shift noticeably?
+If a data point is an outlier, does it skew the statistical conclusion?
+Those questions led to ideas like leave-one-out diagnostics, infinitesimal jackknife,
+and influence functions.
+But there is an important difference.
+In the classical statistical analog, the target is often parameter prediction:
+we predict how the estimator's parameter changes.
+In data attribution for machine learning, especially predictive attribution,
+the target users really care about is often behavior prediction: output, loss, accuracy,
+robustness, fairness, or a specific metric on a downstream task.
+Parameters still matter, but they are only an intermediate layer.
+If parameters change a lot but behavior does not, users may not care.
+Conversely,
+a small parameter change that strongly changes a group of predictions can be very important.
+So when we borrow theory from statistics into ML, we must remember:
+the formulas may begin in parameter space,
+but the final goal of this video is model behavior.
+The first framework is M-estimation.
+The name sounds dry, but the idea is very natural:
+we view the model as the solution of an optimization problem.
+Each training sample creates its own loss.
+If that sample is fully used, its weight is one.
+If that sample is removed, its weight is zero.
+If we only want to reduce its influence, the weight lies between zero and one.
+And if we want to upweight a data group, the weight can be larger than one.
+In other words, instead of thinking of the training set as a fixed list,
+we attach to it a weight vector, called w.
+When w changes, the optimization problem changes.
+When the optimization problem changes, its solution also changes.
+That solution is the model parameter, often denoted theta star of w.
+This is a very important step:
+data attribution is no longer a vague feeling about "which data looks like which output".
+It becomes a question about a function: if we change weight vector w, theta star of w,
+and model behavior, how will they change?
+The simplest case of a weight vector is leave-one-out, often abbreviated LOO.
+We train the model on the full dataset.
+Then we remove one data point, say z j, retrain the model, and compare the results.
+If removing z j changes behavior very strongly,
+we say z j has a large effect on the behavior under study.
+If removing z j barely changes the model, then its influence is small.
+The nice thing about leave-one-out is that it is very clear.
+It does not ask "does this data look related?"
+It asks a concrete counterfactual: in a world almost like the current one,
+but without z j, what would the model be like?
+But the downside is also very clear: it is too expensive.
+With one million data points, exact leave-one-out means almost one million retrains.
+With deep learning, especially foundation models, this is almost impossible.
+So LOO acts like a gold target: easy to understand, definitionally clean,
+but too expensive to compute directly.
+The theory methods in Part II are mainly ways to approximate this target.
+To see why theory helps, the tutorial starts with the easiest example: linear regression.
+We have data points x and y.
+The model is a line, or more generally a linear predictor.
+The loss is squared error: prediction error from y is penalized quadratically.
+In this case, the optimum has a closed-form solution.
+That means we do not need to imagine training as a complete black box.
+We can write theta star directly using matrices of the data.
+And when removing a data point, we also do not need to retrain from scratch.
+Thanks to the Sherman-Morrison formula,
+"deleting a point" can be viewed as a rank-one update to the original matrix.
+The algebraic details can be a bit heavy, but the intuition is beautiful:
+if the learning problem has enough structure, a data point's effect is not magic.
+It is something computable from the current solution and the geometry of the data.
+In linear regression, the leave-one-out formula gives two key intuitions:
+residual and leverage.
+Residual is the remaining error of that data point.
+If the current model predicts very poorly at point z j,
+that point is applying pressure to pull the fit toward itself.
+But a large residual alone is not enough.
+We also need leverage.
+Leverage says how geometrically sensitive that data point's position is.
+A point inside a very dense data region may have a large residual, but when removed,
+nearby points still keep the fit almost the same.
+In contrast, a point on the edge of the distribution can pull the fit much more strongly,
+because it represents a direction that the dataset supports only weakly.
+So influence is not just "which point has high loss".
+Influence combines local error with the global geometry of the problem.
+This is the seed of the later formula:
+the gradient gives the direction a sample wants to pull the model, while the Hessian gives
+the curvature, or stiffness, of the loss landscape along that direction.
+Linear regression is a beautiful case because it has a closed form.
+But many other linear models, like logistic regression, are not so lucky.
+With logistic regression, the model is still linear in the features,
+but the loss is no longer a simple quadratic.
+We usually need optimization to find the solution.
+The next idea is: if there is no closed form for the whole loss,
+we build a quadratic approximation around the current solution.
+Imagine the loss landscape as a curved surface.
+Near the optimum, we zoom into that surface.
+In a small region, it can be replaced by a parabolic bowl: with slope, curvature,
+and an approximate bottom.
+When removing a sample, the true bottom of the new loss may shift.
+We do not find the true bottom by retraining.
+We use the quadratic approximation to predict where the new bottom is.
+For generalized linear models, this idea often works quite well.
+It also reveals a recurring motif: instead of rerunning the learning algorithm,
+we use local geometry around the trained model to predict the counterfactual.
+Now we move from linear models to more general M-estimation.
+At the optimum, the weighted sum of gradients is zero.
+This is the optimality condition: at the loss bottom, data forces are balanced.
+We want to know: if sample j's weight increases slightly, where does theta move?
+To answer, we differentiate the optimality condition with respect to weight w j.
+The result is a very famous formula in robust statistics and later widely used
+in machine learning:
+the influence function.
+At this point, the mathematical assumptions start to matter.
+To make this derivative clean, we usually want a smooth loss, a unique optimum,
+and stable curvature of the loss landscape around that optimum.
+In the language often used in the tutorial, these are conditions like strong convexity,
+a unique minimizer, and an invertible Hessian.
+These conditions make the map from data weights to parameters stable:
+change w a little, and theta star also moves in a predictable way.
+Intuitively, the formula says:
+The effect of sample j on the parameter is approximately negative inverse Hessian times the
+gradient of sample j.
+The gradient of sample j is the direction that sample pulls the model.
+The Hessian is the curvature of the total loss,
+showing how strongly the loss landscape resists movement in each direction.
+The inverse Hessian is like a converter:
+it turns a sample's local pulling force into the predicted movement of the parameter.
+This is why influence functions are appealing: after training one model,
+computing gradients and Hessian-vector products,
+we can estimate the effect of many training points without retraining each time.
+But notice: so far, we have only predicted parameter change.
+That is not the whole of data attribution.
+This is where we must clearly distinguish parameter prediction from behavior prediction.
+Classical influence functions often start with parameter prediction:
+if sample j's weight changes, how far does theta move?
+But data attribution usually does not only care how parameters change.
+Users do not directly look at millions or billions of parameters.
+They care about behavior: prediction for a specific input, loss on a benchmark,
+accuracy on a data group, or the probability that the model produces a certain output.
+So we need one more chain-rule step.
+If sample j moves parameters slightly, and measured behavior changes with them,
+then sample j's effect on behavior is the combination of two parts:
+how sample j pulls parameters, and how sensitive behavior is to that direction.
+In Koh and Liang's paper, influence functions are used exactly in this spirit:
+trace a black-box model's prediction backward through the learning algorithm,
+back to the training examples with the greatest responsibility.
+This is the bridge between theory and practice: not just "this sample affects theta",
+but "how much does this sample change the model's output, loss, or decision".
+So when looking at an attribution method, we should ask: is it predicting parameter change,
+or behavior change?
+If it only has parameter change,
+can it prove that the behavior we care about also changes as claimed?
+Influence functions are beautiful, but they are not a magic wand.
+They rely on several strong assumptions.
+First, the loss should be smooth enough for gradients and Hessians to make sense.
+Second, the problem is often analyzed in a convex or strongly convex setting,
+where the optimum is unique, meaning a unique minimizer, and the Hessian is invertible.
+Third, the model is assumed to have trained close to an optimum.
+Fourth, the perturbation must be small.
+Slightly upweighting a point fits the Taylor approximation better.
+Fully removing a point is a larger change, so the approximation can fail.
+Modern deep learning breaks many of those assumptions.
+The loss is not convex.
+Training has randomness.
+The model does not necessarily converge to a unique solution.
+The Hessian may be degenerate or extremely hard to handle.
+And with large models, simply defining "counterfactual retraining" is already complicated:
+same dataset but different seed, different checkpoint, different schedule,
+the model may arrive at different behavior.
+So influence functions are a valuable approximation, but must be validated.
+Especially with deep neural networks, if convexity or convergence is missing,
+or the Hessian is unstable, we should not assume IF is reliable.
+It gives us a language and a strong baseline, not final proof.
+This is exactly why Part III must discuss scaling and evaluation.
+With DNNs, the question is not only "is the formula elegant",
+but "does it truly predict the real counterfactual behavior?"
+Datamodels take a different route.
+Instead of starting from local geometry of a trained model,
+datamodeling treats the whole learning process as a function to be learned.
+The input is a subset indicator:
+if a data point is present in the training subset, its corresponding position is one,
+and if a data point is removed, it is zero.
+The output is measured behavior after training the model on that subset:
+it may be loss on a test example, accuracy on a group, class probability,
+or a specific score.
+To learn a datamodel, we create many training subsets.
+For each subset, we run the learning algorithm, measure behavior, and store one pair:
+subset indicator and behavior.
+Then we train a surrogate to predict behavior from the subset indicator.
+If this surrogate learns well, we have a powerful tool:
+instead of retraining the main model for every new counterfactual, we ask the datamodel.
+It does not replace the main model; it models the relation between data and model behavior.
+In short, datamodeling turns data attribution into a supervised learning problem.
+The simplest and most important version is the linear datamodel.
+In a linear datamodel,
+the behavior prediction equals a bias term plus the total contribution of data points
+included in the subset.
+If data point i is present, indicator m i is one, and coefficient tau i is added.
+If data point i is absent, the indicator is zero, and that contribution disappears.
+So tau i can be read as the attribution coefficient of data point i for the behavior
+under consideration.
+The interesting point is that linear datamodels are related to both influence functions and
+game-theoretic attribution.
+It resembles influence functions because each data point has a fixed linear effect.
+It also recalls Shapley because we examine many subsets and ask each point's contribution.
+But the goal here is different: the main goal is not satisfying fairness axioms,
+but predicting true counterfactual behavior well.
+Therefore evaluation is extremely important.
+We must hold out some subsets that were not used to train the datamodel.
+For those subsets, we actually train or evaluate the main model, get true behavior,
+and compare it with the behavior predicted by the datamodel.
+If predicted versus actual matches well, the attribution score is more trustworthy.
+If correlation is low, or the datamodel predicts the wrong counterfactual direction,
+then a nice-looking score is still not enough.
+In predictive attribution,
+a score is meaningful only when it helps predict what will happen in counterfactuals not yet
+seen.
+We can summarize Part II in five points.
+One: predictive attribution is rooted in an old statistical analog:
+predicting how an estimator changes when data or data weights change.
+Two: M-estimation gives us a language for talking about data.
+Data is not just present or absent; it enters the learning algorithm through weights.
+Three: leave-one-out is the most basic counterfactual.
+It is clear and intuitive, but too expensive to compute exactly at large scale.
+Four:
+influence functions use gradients and Hessians to approximate changes when the weight of a
+sample changes.
+This is a bridge from robust statistics to machine learning,
+but it comes with strong assumptions like strong convexity, unique minimizer, convergence,
+and a stable Hessian.
+Five: datamodels directly learn the map from data subsets to model behavior.
+If they learn well,
+they turn attribution into a prediction problem that can be evaluated with counterfactuals.
+The common point is: attribution should not be only a beautiful ranking.
+It must answer the question: "if data changes, does behavior change as predicted?"
+And that is where Part III begins.
+When the model is small and convex, the theory is fairly clean.
+But modern ML is not small, not convex, and not cheap.
+So how do we scale these ideas to deep networks, large datasets, and foundation models?
+The next part will discuss scaling and evaluation:
+how modern estimators try to preserve the spirit of the theory,
+while surviving in the messy world of modern machine learning.

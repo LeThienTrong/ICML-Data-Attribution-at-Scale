@@ -1,0 +1,60 @@
+At the end of Part II, we had a fairly clean language.
+Data enters the learning algorithm through a weight vector.
+Leave-one-out gives us a clear counterfactual.
+Influence functions use gradients and the Hessian to approximate the effect of one sample.
+Datamodels learn a direct map from data subsets to model behavior.
+If we stopped here, it might sound like the story is almost finished.
+But Part III is where the phrase "at scale" starts to bite hard.
+In a toy problem, we can imagine removing one data point, retraining the model, measuring behavior, and comparing.
+We can also imagine storing the Hessian, inverting it, or training many models on many subsets.
+But modern machine learning does not operate at that size.
+Datasets may contain millions, hundreds of millions, or billions of examples.
+Models may have millions to billions of parameters.
+The behavior we care about is not just one scalar; it may be loss on thousands of prompts, accuracy across groups, or the probability of a specific output.
+So the question for Part III is:
+How do we keep the counterfactual spirit of Part II while surviving the compute, memory, randomness, and non-convexity of modern ML?
+The important point is: scaling does not just mean "making the code run faster."
+Scaling forces us to choose an approximation.
+We have to decide which part of the problem to ignore, which part to keep, and test that approximation with empirical data.
+In other words, Part III does not only ask: which method is fast?
+It asks: which method still predicts behavior correctly when everything becomes large, noisy, and messy?
+To see the problem more clearly, let us split scaling into three axes.
+The first axis is the number of training points, called n.
+If we want exact leave-one-out for every data point, the minimum cost is already n retraining runs.
+With one million points, that is almost one million retrains.
+If we want to consider every subset, the number of possibilities is no longer n, but two to the n.
+This is not merely a large number; it makes the problem impossible.
+The second axis is the number of parameters, called p.
+The influence function looks compact in the formula:
+Delta f_j is approximately the negative behavior gradient, times inverse Hessian, times the gradient of training sample j.
+But the Hessian is an object of size p by p.
+With a small model, we can still imagine it.
+With a large neural network, storing the full Hessian is already unrealistic, let alone inverting the matrix.
+So practical methods usually never use the full Hessian.
+They use Hessian-vector products, conjugate gradient, LiSSA, diagonal approximations, K-FAC-style approximations, or some form of sketching.
+The third axis is the number of target behaviors, called m.
+An attribution score usually does not exist by itself.
+We want to know which target a data point z affects. A test image? A prompt? A class?
+A subgroup? A metric such as robustness or fairness?
+If there are n training points and m targets, the attribution table alone can have n times m entries.
+When both n and m are large, even storing the scores becomes a problem.
+Therefore at large scale, the question is no longer "compute attribution for everything." The more practical question is:
+Which behavior do we need attribution for, at what resolution, and with how much compute budget?
+Without answering this first, it is easy to choose a method that looks elegant on paper but cannot be used in a real pipeline.
+Before talking about estimators, we need to be careful with the phrase ground truth.
+In Part II, we talked about exact leave-one-out as if it were a clear number:
+Train on S, train on S without z_j, then take the difference in behavior.
+But in deep learning, even "retrain the model" is not a fully deterministic operation.
+With the same dataset, a different seed, data order, augmentation, checkpoint, or learning-rate schedule can lead the model to slightly different behavior.
+For large models, these small differences can sometimes be enough to make attribution look different.
+So when evaluating attribution at large scale, we must define a counterfactual protocol.
+For example: when removing a subset A, do we retrain from scratch or fine-tune from a checkpoint?
+Do we use the same seed or multiple seeds?
+Do we measure behavior at the final checkpoint or average across checkpoints?
+If the target is a language-model output, do we measure log probability, exact match, win rate, or a judge score?
+These details may sound technical, but they determine what attribution means.
+An estimator cannot be right if the target counterfactual has not been defined.
+This point is especially important when comparing methods.
+If one method predicts the effect of slightly upweighting a sample, while the benchmark measures the effect of removing an entire subset and retraining with a different seed, then they are not exactly asking the same question.
+So Part III has one basic principle:
+Before asking which estimator is good, ask: which counterfactual is the estimator trying to predict?

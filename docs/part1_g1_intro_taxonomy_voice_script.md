@@ -1,0 +1,93 @@
+# Part 1 G1 - Intro & Taxonomy Voice Script
+
+Mốc hiện tại: dùng `assets/audio/g1_full_afterfixed.mp3`, dài khoảng 5 phút 58 giây. Video G1 đã được rút timing để khớp file voice full này.
+
+Giữ nguyên các thuật ngữ: `data attribution`, `model behavior`, `training data`, `taxonomy`, `corroborative`, `game-theoretic`, `predictive`, `datamodel`.
+
+## 00:00-00:46 - Opening
+
+Trong video này, ta đi vào một câu hỏi rất cơ bản nhưng càng ngày càng quan trọng trong machine learning: dữ liệu huấn luyện đã ảnh hưởng đến hành vi của model như thế nào?
+
+Thông thường, khi nhìn vào một model, ta chỉ thấy đầu vào, model ở giữa, rồi một output ở phía bên kia. Nhưng phần thật sự khó nằm ở chiều ngược lại.
+
+Khi model trả lời sai, khi model tạo ra một claim đáng nghi, hoặc khi model hoạt động tốt bất ngờ, ta muốn truy ngược lại: phần dữ liệu nào đang liên quan đến hành vi đó?
+
+Đó là tinh thần của `data attribution`: kết nối hành vi của model với training data, không phải bằng cảm giác, mà bằng những score và quy trình có thể kiểm tra.
+
+## 00:46-01:24 - Data, Model, Behavior
+
+Hãy tách bài toán thành một vòng lặp đơn giản.
+
+Training data đi vào quá trình huấn luyện. Quá trình đó tạo ra model. Sau đó model tạo ra behavior trên test case, chẳng hạn một output, một lỗi, một độ chính xác, hoặc một quyết định cụ thể.
+
+Nếu chỉ nhìn từ trái sang phải, ta đang làm machine learning thông thường. Nhưng data attribution yêu cầu ta nhìn ngược lại.
+
+Từ một behavior đã quan sát được, ta hỏi: điểm dữ liệu nào giải thích behavior này, điểm nào hỗ trợ nó, điểm nào nhận credit, và điểm nào sẽ làm behavior thay đổi nếu ta loại bỏ?
+
+## 01:24-02:10 - Main Goals
+
+Video này có bốn mục tiêu.
+
+Đầu tiên, ta xây trực giác cho data attribution: vì sao nó không chỉ là một kỹ thuật phụ, mà là cách đặt câu hỏi về trách nhiệm của dữ liệu.
+
+Thứ hai, ta phân biệt các loại attribution khác nhau. Một score có thể đo evidence, có thể đo credit, hoặc có thể đo khả năng dự đoán behavior khi data thay đổi. Ba thứ này rất dễ bị trộn lẫn.
+
+Thứ ba, ta nối phần trực giác với theory: M-estimation, leave-one-out, influence functions, và datamodels.
+
+Cuối cùng, ta xem vì sao mọi thứ trở nên khó hơn ở scale lớn, và các ý tưởng đó được dùng trong debugging, dataset selection, poisoning, unlearning, citation, và RAG.
+
+## 02:10-02:59 - Roadmap
+
+Lộ trình của video sẽ đi theo bốn phần.
+
+Part I là taxonomy. Ở đây ta không cố chọn một định nghĩa duy nhất cho data attribution. Ta sẽ hỏi: ứng dụng đang cần loại quan hệ nào giữa behavior và data?
+
+Part II đi vào nền tảng lý thuyết. Ta xem model như nghiệm của một bài toán tối ưu có trọng số, rồi hỏi điều gì xảy ra nếu trọng số của một data point thay đổi.
+
+Part III nói về scaling. Những ý tưởng đẹp trên giấy có thể trở nên rất đắt khi dataset có hàng triệu điểm và model có hàng tỷ tham số.
+
+Part IV quay lại ứng dụng. Khi đã có attribution score, ta dùng nó để debug model, chọn data, phát hiện data độc hại, hoặc giải thích nguồn hỗ trợ cho output.
+
+## 02:59-03:43 - Data Problems
+
+Các bài toán data trong ML nhìn bên ngoài rất khác nhau.
+
+Trong debugging, ta muốn biết data nào liên quan đến một lỗi cụ thể. Trong trust và citation, ta muốn biết output được hỗ trợ bởi nguồn nào. Trong dataset selection, ta muốn chọn data giúp model tốt hơn.
+
+Trong data valuation, ta muốn biết nên trả credit cho ai. Trong copyright detection, ta muốn biết output có quá giống dữ liệu gốc không. Trong poisoning và security, ta muốn tìm những điểm dữ liệu làm model bị lệch.
+
+Nhưng phía sau các bài toán đó có cùng một cấu trúc: ta quan sát một behavior của model, rồi cố liên hệ behavior đó với training data hoặc một corpus có sẵn.
+
+## 03:43-04:27 - Definition
+
+Điểm quan trọng là từ "liên hệ" ở đây không có một nghĩa duy nhất.
+
+Một data point có thể là evidence tốt cho một output, nhưng điều đó không có nghĩa nó gây ra output theo nghĩa nhân quả.
+
+Một data point có thể xứng đáng nhận credit trong một utility function, nhưng không nhất thiết là đoạn văn gần nhất về mặt semantic.
+
+Và một data point có thể làm behavior thay đổi mạnh nếu ta bỏ nó ra, dù nó không hề trông giống output.
+
+Vì vậy, trước khi dùng attribution score, ta phải hỏi: score này đang đo quan hệ nào?
+
+## 04:27-05:13 - Taxonomy
+
+Ta sẽ dùng ba lens chính.
+
+Lens thứ nhất là `corroborative attribution`. Câu hỏi là: có evidence nào trong corpus hỗ trợ output này không? Đây là lens rất tự nhiên cho citation, retrieval, và copyright detection.
+
+Lens thứ hai là `game-theoretic attribution`. Câu hỏi là: nếu xem data như những người chơi cùng tạo ra utility, credit nên được chia như thế nào?
+
+Lens thứ ba là `predictive attribution`. Câu hỏi là: nếu training data thay đổi, behavior của model sẽ thay đổi ra sao? Lens này dẫn ta đến datamodels và counterfactual prediction.
+
+Ba lens này có liên quan, nhưng không thay thế cho nhau. Dùng sai lens có thể làm ta diễn giải sai score.
+
+## 05:13-05:58 - Transition to G2
+
+Điểm dừng của G1 là lens đầu tiên: evidence.
+
+Ở đoạn tiếp theo, ta chưa cần giải toàn bộ bài toán attribution. Ta chỉ tập trung vào câu hỏi nhẹ hơn: một output có được hỗ trợ bởi dữ liệu hay không?
+
+Đó là cánh cửa đi vào `corroborative attribution`.
+
+Chi tiết về corpus, score, ranking, và evidence candidates sẽ để dành cho G2, nơi ta chuyển từ taxonomy sang cơ chế cụ thể.

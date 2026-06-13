@@ -1,0 +1,211 @@
+Ở Part I, ta đã có ba lens để nhìn data attribution.
+
+Corroborative attribution hỏi: output này được hỗ trợ bởi evidence nào?
+
+Game-theoretic attribution hỏi: nếu nhiều data point cùng tạo ra một utility, credit nên được chia ra sao?
+
+Predictive attribution hỏi một câu khác: nếu training data thay đổi, model behavior sẽ thay đổi như thế nào?
+
+Part II bắt đầu từ câu hỏi thứ ba này.
+
+Lý do là, nếu không có theory, một attribution score rất dễ trở thành một con số nghe có vẻ hợp lý nhưng khó kiểm chứng. Ta có thể nói một data point "quan trọng", nhưng quan trọng theo nghĩa nào? Nó làm loss giảm? Nó làm một test example đổi nhãn? Nó giúp accuracy tổng thể, hay chỉ giúp một nhóm dữ liệu nhỏ? Và nếu ta thật sự bỏ nó ra khỏi training set, chuyện dự đoán kia có xảy ra không?
+
+Vì vậy, trong phần này, ta sẽ biến trực giác thành một bài toán rõ ràng hơn: training data đi vào learning algorithm như thế nào, thay đổi data nghĩa là gì, và làm sao dự đoán counterfactual behavior mà không cần train lại model từ đầu quá nhiều lần.
+
+Một điểm đáng chú ý là: phần theory này không bắt đầu từ deep learning.
+
+Nó có một statistical analog khá lâu đời.
+
+Trong thống kê, người ta đã quan tâm từ rất sớm đến câu hỏi: nếu dataset thay đổi một chút, estimator sẽ thay đổi thế nào?
+
+Ví dụ, nếu ta bỏ một quan sát ra khỏi regression, coefficient có đổi nhiều không? Nếu ta tăng trọng số của một sample, estimate có dịch đáng kể không? Nếu một điểm dữ liệu là outlier, nó có làm kết luận thống kê bị kéo lệch không?
+
+Những câu hỏi đó dẫn đến các ý tưởng như leave-one-out diagnostics, infinitesimal jackknife, và influence functions.
+
+Nhưng có một khác biệt quan trọng.
+
+Trong statistical analog cổ điển, target thường là parameter prediction: ta dự đoán parameter của estimator thay đổi ra sao.
+
+Còn trong data attribution cho machine learning, nhất là predictive attribution, target mà người dùng thật sự quan tâm thường là behavior prediction: output, loss, accuracy, robustness, fairness, hoặc một metric cụ thể trên downstream task.
+
+Parameter vẫn quan trọng, nhưng nó chỉ là tầng trung gian. Nếu parameter đổi rất nhiều mà behavior không đổi, người dùng có thể không quan tâm. Ngược lại, một thay đổi parameter nhỏ nhưng làm một nhóm prediction đổi mạnh lại rất quan trọng.
+
+Vì vậy, khi ta mượn theory từ thống kê sang ML, ta phải nhớ: công thức có thể bắt đầu trong parameter space, nhưng mục tiêu cuối cùng của video này là model behavior.
+
+Framework đầu tiên là M-estimation.
+
+Nghe tên hơi khô, nhưng ý tưởng rất tự nhiên: ta xem model như nghiệm của một bài toán tối ưu.
+
+Mỗi training sample tạo ra một loss riêng. Nếu sample đó được dùng đầy đủ, trọng số của nó là một. Nếu sample đó bị bỏ ra, trọng số của nó là không. Nếu ta chỉ muốn giảm ảnh hưởng của nó, trọng số nằm giữa không và một. Và nếu ta muốn upweight một nhóm dữ liệu, trọng số có thể lớn hơn một.
+
+Nói cách khác, thay vì chỉ nghĩ training set là một danh sách cố định, ta gắn với nó một weight vector, gọi là w.
+
+Khi w thay đổi, bài toán tối ưu thay đổi. Khi bài toán tối ưu thay đổi, nghiệm của nó cũng thay đổi. Nghiệm đó là parameter của model, thường được ký hiệu là theta star của w.
+
+Đây là bước rất quan trọng: data attribution không còn là một cảm giác mơ hồ về "data nào giống output nào". Nó trở thành câu hỏi về một hàm: nếu ta thay đổi weight vector w, theta star của w, và behavior của model, sẽ thay đổi ra sao?
+
+Trường hợp đơn giản nhất của weight vector là leave-one-out, thường viết tắt là LOO.
+
+Ta train model trên toàn bộ dataset. Sau đó ta bỏ một data point, ví dụ z j, train lại model, rồi so sánh kết quả.
+
+Nếu bỏ z j làm behavior thay đổi rất mạnh, ta nói z j có ảnh hưởng lớn đối với behavior đang xét. Nếu bỏ z j mà model gần như không đổi, thì influence của nó nhỏ.
+
+Điểm hay của leave-one-out là nó rất rõ ràng. Nó không hỏi "data này nhìn có liên quan không". Nó hỏi một counterfactual cụ thể: trong một thế giới gần giống thế giới hiện tại, nhưng thiếu z j, model sẽ ra sao?
+
+Nhưng điểm dở cũng rất rõ: nó quá đắt.
+
+Nếu dataset có một triệu điểm, exact leave-one-out nghĩa là train lại gần một triệu lần. Với deep learning, đặc biệt là foundation models, chuyện này gần như không thể.
+
+Vì vậy LOO đóng vai trò giống một mục tiêu vàng: dễ hiểu, đúng về mặt định nghĩa, nhưng quá tốn để tính trực tiếp. Các phương pháp theory trong Part II chủ yếu là những cách xấp xỉ mục tiêu này.
+
+Để thấy vì sao theory có ích, tutorial bắt đầu với ví dụ dễ nhất: linear regression.
+
+Ta có các điểm dữ liệu x và y. Model là một đường thẳng, hoặc tổng quát hơn là một linear predictor. Loss là squared error: dự đoán lệch y bao nhiêu thì bị phạt theo bình phương.
+
+Trong trường hợp này, nghiệm tối ưu có công thức đóng. Nghĩa là ta không cần tưởng tượng training như một hộp đen hoàn toàn. Ta có thể viết nghiệm theta star trực tiếp bằng ma trận của dữ liệu.
+
+Và khi bỏ một điểm dữ liệu ra, ta cũng không cần train lại từ đầu. Nhờ công thức Sherman-Morrison, việc "xóa một điểm" có thể được xem như một cập nhật hạng một trên ma trận ban đầu.
+
+Chi tiết đại số có thể hơi nặng, nhưng thông điệp trực giác rất đẹp: nếu learning problem đủ có cấu trúc, ảnh hưởng của một data point không phải phép màu. Nó là thứ có thể tính được từ nghiệm hiện tại và geometry của dữ liệu.
+
+Trong linear regression, công thức leave-one-out cho ta hai mảnh trực giác rất quan trọng: residual và leverage.
+
+Residual là lỗi còn lại của data point đó. Nếu model hiện tại dự đoán rất sai ở điểm z j, điểm đó đang tạo áp lực kéo đường fit về phía nó.
+
+Nhưng residual lớn thôi chưa đủ.
+
+Ta còn cần leverage. Leverage nói rằng điểm dữ liệu đó nằm ở vị trí hình học nhạy cảm đến đâu. Một điểm nằm trong vùng rất đông dữ liệu có thể có residual lớn, nhưng khi bỏ nó ra, các điểm xung quanh vẫn giữ đường fit gần như cũ. Ngược lại, một điểm nằm ở rìa phân phối có thể kéo đường fit mạnh hơn nhiều, vì nó đại diện cho một hướng mà dataset ít hỗ trợ.
+
+Vậy influence không chỉ là "điểm nào có loss cao". Influence là sự kết hợp giữa lỗi cục bộ và hình học toàn cục của bài toán.
+
+Đây là hạt giống của công thức sau này: gradient cho ta hướng mà một sample muốn kéo model đi, còn Hessian cho ta độ cong, hay độ cứng, của loss landscape đối với hướng đó.
+
+Linear regression là trường hợp quá đẹp vì có công thức đóng. Nhưng nhiều model tuyến tính khác, như logistic regression, không may mắn như vậy.
+
+Với logistic regression, model vẫn tuyến tính theo feature, nhưng loss không còn là một quadratic đơn giản. Ta thường phải dùng optimization để tìm nghiệm.
+
+Ý tưởng tiếp theo là: nếu không có công thức đóng cho toàn bộ loss, ta tạo một xấp xỉ quadratic quanh nghiệm hiện tại.
+
+Hãy tưởng tượng loss landscape như một bề mặt cong. Gần điểm tối ưu, ta phóng to bề mặt đó. Trong một vùng nhỏ, nó có thể được thay bằng một cái bát parabol: có độ dốc, có độ cong, và có đáy xấp xỉ.
+
+Khi bỏ một sample ra, đáy thật của loss mới có thể dịch đi. Ta không tìm đáy thật bằng cách train lại. Ta dùng quadratic approximation để dự đoán đáy mới nằm ở đâu.
+
+Với các generalized linear models, ý tưởng này thường hoạt động khá tốt. Nó cũng cho thấy một motif sẽ lặp lại nhiều lần: thay vì chạy lại learning algorithm, ta dùng local geometry quanh model đã train để dự đoán counterfactual.
+
+Bây giờ ta đi từ linear model sang M-estimation tổng quát hơn.
+
+Ở nghiệm tối ưu, tổng gradient có trọng số bằng không. Đây là optimality condition: nếu model đã ở đáy loss, các lực kéo từ dữ liệu cân bằng nhau.
+
+Ta muốn biết: nếu tăng nhẹ weight của sample j, nghiệm theta sẽ dịch theo hướng nào?
+
+Để trả lời, ta đạo hàm optimality condition theo weight w j. Kết quả là một công thức rất nổi tiếng trong robust statistics và sau này được dùng nhiều trong machine learning: influence function.
+
+Lúc này, những giả định toán học bắt đầu quan trọng.
+
+Để đạo hàm này sạch, ta thường muốn loss đủ trơn, nghiệm tối ưu là duy nhất, và quanh nghiệm đó loss landscape có độ cong ổn định. Trong ngôn ngữ thường gặp của tutorial, đó là các điều kiện như strong convexity, unique minimizer, và Hessian khả nghịch.
+
+Những điều kiện này làm cho bản đồ từ data weights sang parameter trở nên ổn định: thay đổi w một chút thì theta star cũng dịch một cách có thể dự đoán.
+
+Ở mức trực giác, công thức nói:
+
+Ảnh hưởng của sample j lên parameter xấp xỉ bằng âm inverse Hessian nhân với gradient của sample j.
+
+Gradient của sample j là hướng mà sample đó kéo model. Hessian là độ cong của tổng loss, cho biết loss landscape chống lại chuyển động theo từng hướng mạnh hay yếu. Inverse Hessian giống như bộ chuyển đổi: nó biến lực kéo cục bộ của một sample thành dịch chuyển dự đoán của parameter.
+
+Đây là lý do influence function hấp dẫn: chỉ cần train một model, tính gradient và Hessian-vector products, ta có thể ước lượng ảnh hưởng của nhiều training points mà không train lại từng lần.
+
+Nhưng hãy để ý: ở đây ta mới dự đoán parameter thay đổi. Đó chưa phải toàn bộ data attribution.
+
+Đây là chỗ ta phải phân biệt thật rõ parameter prediction và behavior prediction.
+
+Influence function cổ điển thường bắt đầu bằng parameter prediction: nếu weight của sample j thay đổi, theta sẽ dịch bao nhiêu?
+
+Nhưng data attribution thường không chỉ quan tâm parameter thay đổi ra sao.
+
+Người dùng không nhìn trực tiếp vào hàng triệu hoặc hàng tỷ parameter. Họ quan tâm behavior: prediction cho một input cụ thể, loss trên một benchmark, accuracy trên một nhóm dữ liệu, hoặc xác suất model tạo một output nào đó.
+
+Vì vậy ta cần thêm một bước chain rule.
+
+Nếu sample j làm parameter dịch một chút, và behavior mà ta đo cũng thay đổi theo parameter, thì ảnh hưởng của sample j lên behavior bằng hai phần ghép lại: sample j kéo parameter theo hướng nào, và behavior nhạy với hướng parameter đó đến đâu.
+
+Trong paper của Koh và Liang, influence functions được dùng theo đúng tinh thần này: trace một prediction của black-box model ngược qua learning algorithm, rồi về các training examples có trách nhiệm lớn nhất.
+
+Đây là cây cầu giữa theory và câu hỏi thực tế: không chỉ "sample này ảnh hưởng lên theta", mà là "sample này làm output, loss, hoặc decision của model thay đổi bao nhiêu".
+
+Vì vậy, khi xem một attribution method, ta nên hỏi: nó đang dự đoán parameter change, hay behavior change? Nếu chỉ có parameter change, nó có chứng minh được rằng behavior ta quan tâm cũng thay đổi đúng như vậy không?
+
+Influence function rất đẹp, nhưng nó không phải cây đũa thần.
+
+Nó dựa trên một số giả định mạnh.
+
+Thứ nhất, loss nên đủ trơn để gradient và Hessian có ý nghĩa.
+
+Thứ hai, bài toán thường được phân tích trong setting convex hoặc strongly convex, nơi nghiệm tối ưu là duy nhất, tức là có unique minimizer, và Hessian khả nghịch.
+
+Thứ ba, model được giả định là đã train đến gần nghiệm tối ưu.
+
+Thứ tư, perturbation phải nhỏ. Upweight một điểm một chút thì Taylor approximation hợp lý hơn. Bỏ hẳn một điểm ra khỏi dataset là thay đổi lớn hơn, nên xấp xỉ có thể sai.
+
+Modern deep learning phá nhiều giả định trong số đó. Loss không convex. Training có randomness. Model không nhất thiết hội tụ đến một nghiệm duy nhất. Hessian có thể suy biến hoặc cực kỳ khó xử lý. Và với model lớn, chỉ cần định nghĩa "counterfactual retraining" cũng đã phức tạp: cùng dataset nhưng seed khác, checkpoint khác, schedule khác, model có thể đi đến behavior khác.
+
+Vì vậy, influence function là một approximation có giá trị, nhưng phải được kiểm chứng.
+
+Đặc biệt với deep neural networks, nếu thiếu convexity, thiếu convergence, hoặc Hessian không ổn định, ta không nên mặc định rằng IF reliable.
+
+Nó cho ta ngôn ngữ và baseline mạnh, không phải bằng chứng cuối cùng.
+
+Đây chính là lý do Part III phải nói về scaling và evaluation. Với DNN, câu hỏi không chỉ là "công thức có đẹp không", mà là "nó có dự đoán đúng counterfactual behavior thật không?"
+
+Datamodels đi theo một hướng khác.
+
+Thay vì bắt đầu từ local geometry của một model đã train, datamodeling xem toàn bộ learning process như một hàm cần học.
+
+Input là một subset indicator: data point nào có mặt trong training subset thì vị trí tương ứng là một, data point nào bị loại thì là không.
+
+Output là behavior đo được sau khi train model trên subset đó: có thể là loss trên một test example, accuracy trên một group, xác suất của một class, hoặc một score cụ thể.
+
+Để học datamodel, ta tạo nhiều training subsets. Với mỗi subset, ta chạy learning algorithm, đo behavior, rồi lưu lại một cặp: subset indicator và behavior.
+
+Sau đó ta train một surrogate để dự đoán behavior từ subset indicator.
+
+Nếu surrogate này học tốt, ta có một công cụ mạnh: thay vì train lại model chính cho mọi counterfactual mới, ta hỏi datamodel. Nó không thay thế model chính; nó mô hình hóa quan hệ giữa data và behavior của model chính.
+
+Nói ngắn gọn, datamodeling biến data attribution thành một bài toán supervised learning.
+
+Phiên bản đơn giản và quan trọng nhất là linear datamodel.
+
+Trong linear datamodel, prediction của behavior bằng một bias term cộng với tổng contribution của các data point được include trong subset.
+
+Nếu data point i có mặt, indicator m i bằng một, coefficient tau i được cộng vào prediction. Nếu data point i vắng mặt, indicator bằng không, contribution đó biến mất.
+
+Vì vậy tau i có thể được đọc như attribution coefficient của data point i đối với behavior đang xét.
+
+Điểm thú vị là linear datamodel có họ hàng với cả influence functions lẫn game-theoretic attribution. Nó giống influence function ở chỗ mỗi data point có một effect tuyến tính, cố định. Nó cũng gợi nhớ Shapley ở chỗ ta nhìn nhiều subsets và hỏi contribution của từng điểm. Nhưng mục tiêu ở đây khác: mục tiêu chính không phải thỏa mãn axioms công bằng, mà là predict counterfactual behavior thật tốt.
+
+Vì thế evaluation cực kỳ quan trọng.
+
+Ta phải giữ lại một số subsets chưa dùng để train datamodel. Với các subsets đó, ta thật sự train hoặc evaluate model chính, lấy behavior thật, rồi so sánh với behavior datamodel dự đoán.
+
+Nếu predicted-vs-actual khớp tốt, attribution score đáng tin hơn. Nếu correlation thấp, hoặc datamodel dự đoán sai direction của counterfactual, thì score nhìn đẹp cũng chưa đủ.
+
+Trong predictive attribution, một score chỉ có nghĩa khi nó giúp dự đoán điều sẽ xảy ra trong những counterfactual chưa thấy.
+
+Ta có thể tóm tắt Part II bằng năm ý.
+
+Một: predictive attribution có gốc gần với một statistical analog lâu đời: dự đoán estimator thay đổi thế nào khi dữ liệu hoặc trọng số dữ liệu thay đổi.
+
+Hai: M-estimation cho ta một ngôn ngữ để nói về data. Data không chỉ có mặt hoặc vắng mặt; nó đi vào learning algorithm qua weight vector.
+
+Ba: leave-one-out là counterfactual cơ bản nhất. Nó rõ ràng, dễ hiểu, nhưng quá đắt nếu tính chính xác ở scale lớn.
+
+Bốn: influence functions dùng gradient và Hessian để xấp xỉ điều gì sẽ xảy ra khi weight của một sample thay đổi. Đây là cầu nối từ robust statistics sang machine learning, nhưng đi kèm các giả định mạnh như strong convexity, unique minimizer, convergence, và Hessian ổn định.
+
+Năm: datamodels học trực tiếp map từ subset data sang model behavior. Nếu học tốt, chúng biến attribution thành một bài toán prediction có thể đánh giá bằng counterfactuals.
+
+Điểm chung của tất cả là: attribution không nên chỉ là một ranking đẹp. Nó phải trả lời được câu hỏi "nếu data thay đổi, behavior có đổi như dự đoán không?"
+
+Và đó là nơi Part III bắt đầu.
+
+Khi model nhỏ và convex, theory khá sạch. Nhưng modern ML không nhỏ, không convex, và không rẻ. Vậy làm sao scale những ý tưởng này lên deep networks, large datasets, và foundation models?
+
+Phần tiếp theo sẽ nói về scaling và evaluation: cách các estimator hiện đại cố gắng giữ lại tinh thần của theory, nhưng sống được trong thế giới messy của modern machine learning.

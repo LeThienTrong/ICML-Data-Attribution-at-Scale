@@ -1,0 +1,1170 @@
+1
+00:00:00,000 --> 00:00:05,912
+Ở Part III, ta đã nhìn data attribution như một bài toán scaling và evaluation.
+In Part III, we treated data attribution as a problem of scaling and evaluation.
+
+2
+00:00:05,912 --> 00:00:12,668
+Ta hỏi: nếu không thể retrain model cho mọi counterfactual, ta có thể dùng estimator
+nào?
+We asked: if we cannot retrain the model for every counterfactual, which estimator can
+we use?
+
+3
+00:00:12,668 --> 00:00:14,456
+Influence function?
+Influence function?
+
+4
+00:00:14,456 --> 00:00:16,244
+TracIn?
+TracIn?
+
+5
+00:00:16,244 --> 00:00:18,033
+TRAK?
+TRAK?
+
+6
+00:00:18,033 --> 00:00:19,821
+Datamodels?
+Datamodels?
+
+7
+00:00:19,821 --> 00:00:21,609
+Hay một proxy rẻ hơn?
+Or a cheaper proxy?
+
+8
+00:00:21,609 --> 00:00:25,981
+Nhưng khi bước sang ứng dụng, câu hỏi thay đổi một chút.
+But when we move to applications, the question changes slightly.
+
+9
+00:00:25,981 --> 00:00:31,595
+Người dùng cuối thường không hỏi: estimator này đẹp về mặt toán học không?
+End users usually do not ask whether this estimator is mathematically elegant.
+
+10
+00:00:31,595 --> 00:00:34,327
+Họ hỏi: score này giúp tôi làm gì?
+They ask: what does this score help me do?
+
+11
+00:00:34,327 --> 00:00:37,133
+Nó có giúp debug một lỗi cụ thể không?
+Can it help debug a specific failure?
+
+12
+00:00:37,133 --> 00:00:39,493
+Có giúp chọn data tốt hơn không?
+Can it help select better data?
+
+13
+00:00:39,493 --> 00:00:41,902
+Có giúp phát hiện poisoning không?
+Can it help detect poisoning?
+
+14
+00:00:41,902 --> 00:00:46,150
+Có giúp unlearn một tập dữ liệu mà không phá model không?
+Can it help unlearn a dataset without breaking the model?
+
+15
+00:00:46,150 --> 00:00:49,602
+Có giúp trích dẫn nguồn cho một câu trả lời không?
+Can it help cite sources for an answer?
+
+16
+00:00:49,602 --> 00:00:54,669
+Vì vậy Part IV là lớp quyết định nằm trên tất cả những gì ta đã xây.
+So Part IV is the decision layer on top of everything we have built.
+
+17
+00:00:54,669 --> 00:00:59,538
+Ta không còn nhìn attribution score như một con số đứng một mình.
+We no longer view an attribution score as a number standing alone.
+
+18
+00:00:59,538 --> 00:01:02,419
+Ta nhìn nó như một tín hiệu để hành động.
+We view it as a signal for action.
+
+19
+00:01:02,419 --> 00:01:11,435
+Và khi đã nói đến hành động, câu hỏi quan trọng nhất là: hành động đó cần loại quan hệ
+nào giữa data và behavior?
+And once we talk about action, the most important question is: what kind of relationship
+between data and behavior does that action need?
+
+20
+00:01:11,435 --> 00:01:14,093
+Nếu cần evidence, ta dùng một lens.
+If we need evidence, we use one lens.
+
+21
+00:01:14,093 --> 00:01:16,751
+Nếu cần credit, ta dùng lens khác.
+If we need credit, we use another lens.
+
+22
+00:01:16,751 --> 00:01:21,818
+Nếu cần dự đoán counterfactual behavior, ta lại cần một lens khác.
+If we need to predict counterfactual behavior, we need yet another lens.
+
+23
+00:01:21,818 --> 00:01:29,443
+Đây là điểm giữ cho toàn bộ video không bị lẫn lộn: ứng dụng quyết định ý nghĩa của
+attribution.
+This is the point that keeps the whole video from getting confused: the application
+decides what attribution means.
+
+24
+00:01:29,443 --> 00:01:34,228
+Trước khi đi vào từng ứng dụng, hãy đặt một recipe chung.
+Before going into each application, let us set up a general recipe.
+
+25
+00:01:34,228 --> 00:01:38,088
+Bước một: định nghĩa model behavior ta quan tâm.
+Step one: define the model behavior we care about.
+
+26
+00:01:38,088 --> 00:01:50,565
+Behavior có thể là một output sai, loss trên một subgroup, hallucination rate, win rate,
+toxicity, robustness, fairness, hoặc accuracy trên một benchmark cụ thể.
+Behavior can be a wrong output, loss on a subgroup, hallucination rate, win rate,
+toxicity, robustness, fairness, or accuracy on a specific benchmark.
+
+27
+00:01:50,565 --> 00:01:55,350
+Nếu behavior không rõ, attribution score cũng sẽ mơ hồ.
+If the behavior is not clear, the attribution score will also be vague.
+
+28
+00:01:55,350 --> 00:01:57,809
+Bước hai: định nghĩa data unit.
+Step two: define the data unit.
+
+29
+00:01:57,809 --> 00:02:08,674
+Một unit có thể là một document, một paragraph, một image, một user record, một
+prompt-response pair, một cluster dữ liệu, hoặc cả một dataset.
+A unit can be a document, a paragraph, an image, a user record, a prompt-response pair,
+a data cluster, or an entire dataset.
+
+30
+00:02:08,674 --> 00:02:13,749
+Việc chọn unit quyết định score có thể hành động được hay không.
+The choice of unit decides whether the score can lead to action.
+
+31
+00:02:13,749 --> 00:02:16,525
+Nếu unit quá nhỏ, score nhiễu.
+If the unit is too small, the score is noisy.
+
+32
+00:02:16,525 --> 00:02:20,675
+Nếu unit quá lớn, ta không biết nên sửa phần nào.
+If the unit is too large, we do not know which part to fix.
+
+33
+00:02:20,675 --> 00:02:23,372
+Bước ba: định nghĩa intervention.
+Step three: define the intervention.
+
+34
+00:02:23,372 --> 00:02:25,275
+Ta sẽ remove data?
+Will we remove data?
+
+35
+00:02:25,275 --> 00:02:27,179
+Downweight data?
+Downweight data?
+
+36
+00:02:27,179 --> 00:02:29,082
+Add data?
+Add data?
+
+37
+00:02:29,082 --> 00:02:30,985
+Replace label?
+Replace labels?
+
+38
+00:02:30,985 --> 00:02:32,889
+Deduplicate?
+Deduplicate?
+
+39
+00:02:32,889 --> 00:02:35,638
+Hay retrain không có một forget set?
+Or retrain without a forget set?
+
+40
+00:02:35,638 --> 00:02:43,489
+Attribution dùng để giải thích một output không nhất thiết trả lời được câu hỏi remove
+data sẽ làm gì.
+Attribution used to explain an output does not necessarily answer what removing data
+will do.
+
+41
+00:02:43,489 --> 00:02:46,609
+Bước bốn: chọn notion of attribution.
+Step four: choose the notion of attribution.
+
+42
+00:02:46,609 --> 00:02:49,781
+Corroborative attribution đo evidence.
+Corroborative attribution measures evidence.
+
+43
+00:02:49,781 --> 00:02:54,275
+Game-theoretic attribution đo credit trong một utility.
+Game-theoretic attribution measures credit within a utility.
+
+44
+00:02:54,275 --> 00:03:00,144
+Predictive attribution đo khả năng dự đoán behavior khi data thay đổi.
+Predictive attribution measures the ability to predict behavior when data changes.
+
+45
+00:03:00,144 --> 00:03:03,554
+Bước năm: kiểm tra bằng evaluation phù hợp.
+Step five: check with the right evaluation.
+
+46
+00:03:03,554 --> 00:03:10,031
+Nếu score dùng để rank data cho debugging, ta kiểm tra precision của top examples.
+If the score ranks data for debugging, we check precision among the top examples.
+
+47
+00:03:10,031 --> 00:03:15,899
+Nếu score dùng để chọn data, ta kiểm tra model sau khi thêm hoặc bỏ data.
+If the score selects data, we check the model after adding or removing data.
+
+48
+00:03:15,899 --> 00:03:21,477
+Nếu score dùng cho unlearning, ta kiểm tra behavior sau intervention.
+If the score is for unlearning, we check behavior after the intervention.
+
+49
+00:03:21,477 --> 00:03:26,447
+Recipe này nghe có vẻ chậm, nhưng nó tiết kiệm rất nhiều sai lầm.
+This recipe may sound slow, but it prevents many mistakes.
+
+50
+00:03:26,447 --> 00:03:37,365
+Vì nếu không định nghĩa behavior, unit, intervention, và evaluation, một score rất đẹp
+vẫn có thể không trả lời đúng câu hỏi của ứng dụng.
+Because without defining behavior, unit, intervention, and evaluation, a beautiful score
+can still answer the wrong application question.
+
+51
+00:03:37,365 --> 00:03:40,171
+Ứng dụng đầu tiên là model debugging.
+The first application is model debugging.
+
+52
+00:03:40,171 --> 00:03:53,223
+Ta bắt đầu từ một behavior xấu đã quan sát được: model phân loại sai một image, trả lời
+sai một factual question, hallucinate một claim, hoặc fail trên một nhóm người dùng cụ
+thể.
+We start from a bad behavior we have observed: the model misclassifies an image, answers
+a factual question incorrectly, hallucinates a claim, or fails on a specific user group.
+
+53
+00:03:53,223 --> 00:04:00,177
+Một phản ứng tự nhiên là hỏi: trong training data, có những examples nào liên quan đến
+lỗi này?
+A natural reaction is to ask: in the training data, which examples are related to this
+failure?
+
+54
+00:04:00,177 --> 00:04:05,178
+Ở đây, attribution không nhất thiết phải chứng minh nhân quả hoàn toàn.
+Here, attribution does not always need to prove full causality.
+
+55
+00:04:05,178 --> 00:04:09,570
+Nhiều khi ta chỉ cần một shortlist tốt để con người kiểm tra.
+Often we only need a good shortlist for humans to inspect.
+
+56
+00:04:09,570 --> 00:04:22,354
+Ví dụ, nếu model trả lời sai vì học nhầm một pattern, attribution có thể kéo ra các
+training examples có label sai, annotation mơ hồ, hoặc data bị duplicated quá nhiều.
+For example, if the model answers wrongly because it learned the wrong pattern,
+attribution can pull out training examples with wrong labels, ambiguous annotations, or
+too many duplicates.
+
+57
+00:04:22,354 --> 00:04:35,114
+Nếu model fail trên một subgroup, attribution có thể chỉ ra rằng training set có rất ít
+examples giống subgroup đó, hoặc có nhiều examples gần giống nhưng label không nhất
+quán.
+If the model fails on a subgroup, attribution may show that the training set has very
+few examples like that subgroup, or many similar examples with inconsistent labels.
+
+58
+00:04:35,114 --> 00:04:55,047
+Các nghiên cứu về datamodels còn cho ta một kiểu audit rộng hơn: tìm brittle
+predictions, tức những prediction đổi mạnh khi training subset thay đổi; và tìm
+train-test leakage, khi một test example có dấu vết phụ thuộc bất thường vào một phần
+training data rất gần với nó.
+Research on datamodels also gives us a broader audit: find brittle predictions, meaning
+predictions that change strongly when the training subset changes; and find train-test
+leakage, when a test example has an unusual dependence on a very nearby part of the
+training data.
+
+59
+00:04:55,047 --> 00:05:01,146
+Trong debugging, top-k examples thường quan trọng hơn một score tuyệt đối hoàn hảo.
+In debugging, top-k examples are often more important than a perfect absolute score.
+
+60
+00:05:01,146 --> 00:05:06,001
+Người engineer muốn biết: tôi nên nhìn vào 20 examples nào trước?
+The engineer wants to know: which 20 examples should I inspect first?
+
+61
+00:05:06,001 --> 00:05:14,589
+Vì vậy evaluation cho debugging có thể rất thực dụng: trong top-k examples, bao nhiêu
+cái thật sự giúp chẩn đoán lỗi?
+So evaluation for debugging can be very pragmatic: among the top-k examples, how many
+truly help diagnose the failure?
+
+62
+00:05:14,589 --> 00:05:18,053
+Nếu remove hoặc sửa chúng, lỗi có giảm không?
+If we remove or fix them, does the failure decrease?
+
+63
+00:05:18,053 --> 00:05:21,811
+Nếu thêm data tương tự, behavior có cải thiện không?
+If we add similar data, does the behavior improve?
+
+64
+00:05:21,811 --> 00:05:23,567
+Nhưng có một bẫy nhỏ.
+But there is a small trap.
+
+65
+00:05:23,567 --> 00:05:28,349
+Data liên quan về mặt semantic chưa chắc là data gây lỗi.
+Data that is semantically related is not necessarily data that caused the failure.
+
+66
+00:05:28,349 --> 00:05:34,595
+Một example nhìn rất giống test case có thể chỉ là evidence, không phải nguyên nhân.
+An example that looks very similar to the test case may only be evidence, not the cause.
+
+67
+00:05:34,595 --> 00:05:41,377
+Ngược lại, một cluster dữ liệu tưởng như xa hơn có thể đã làm model học một shortcut
+sai.
+Conversely, a data cluster that looks farther away may have made the model learn the
+wrong shortcut.
+
+68
+00:05:41,377 --> 00:05:53,332
+Vì vậy debugging thường cần kết hợp hai thứ: similarity để tìm evidence gần, và
+predictive hoặc counterfactual attribution để kiểm tra tác động khi data thay đổi.
+So debugging often needs to combine two things: similarity to find nearby evidence, and
+predictive or counterfactual attribution to test the effect when data changes.
+
+69
+00:05:53,332 --> 00:05:56,280
+Ứng dụng thứ hai là dataset selection.
+The second application is dataset selection.
+
+70
+00:05:56,280 --> 00:06:06,918
+Nếu debugging bắt đầu từ câu hỏi "lỗi này đến từ đâu?", dataset selection hỏi: "ta nên
+huấn luyện thêm, giữ lại, hoặc ưu tiên dữ liệu nào?"
+If debugging starts from the question "where did this error come from?", dataset
+selection asks: "which data should we train more on, keep, or prioritize?"
+
+71
+00:06:06,918 --> 00:06:09,276
+Đây là một câu hỏi rất thực tế.
+This is a very practical question.
+
+72
+00:06:09,276 --> 00:06:15,197
+Trong nhiều pipeline, dữ liệu không còn là thứ ta chỉ gom càng nhiều càng tốt.
+In many pipelines, data is no longer something we simply collect as much as possible.
+
+73
+00:06:15,197 --> 00:06:23,721
+Data có chi phí: chi phí lưu trữ, chi phí annotation, chi phí training, chi phí kiểm
+duyệt, và đôi khi cả chi phí pháp lý.
+Data has cost: storage cost, annotation cost, training cost, moderation cost, and
+sometimes legal cost.
+
+74
+00:06:23,721 --> 00:06:32,025
+Nếu ta có một ngân sách hữu hạn, attribution có thể giúp chọn data dự kiến cải thiện
+behavior quan trọng nhất.
+If we have a limited budget, attribution can help choose data that is expected to
+improve the most important behavior.
+
+75
+00:06:32,025 --> 00:06:36,078
+Ví dụ, ta muốn cải thiện accuracy trên rare classes.
+For example, we may want to improve accuracy on rare classes.
+
+76
+00:06:36,078 --> 00:06:42,834
+Ta có thể tìm những examples mà estimator dự đoán sẽ làm behavior trên rare classes tốt
+hơn.
+We can look for examples that the estimator predicts will improve behavior on rare
+classes.
+
+77
+00:06:42,834 --> 00:06:46,961
+Hoặc ta muốn giảm hallucination cho một loại câu hỏi.
+Or we may want to reduce hallucination for a type of question.
+
+78
+00:06:46,961 --> 00:06:55,928
+Ta có thể ưu tiên data có tác động dự đoán tốt lên metric đó, thay vì chỉ thêm data
+giống query về mặt embedding.
+We can prioritize data with a predicted positive effect on that metric, instead of only
+adding data that is embedding-similar to the query.
+
+79
+00:06:55,928 --> 00:06:59,146
+Ở đây, predictive attribution rất tự nhiên.
+Here, predictive attribution is very natural.
+
+80
+00:06:59,146 --> 00:07:02,340
+Ta không chỉ hỏi data nào giống target.
+We do not only ask which data looks like the target.
+
+81
+00:07:02,340 --> 00:07:08,359
+Ta hỏi nếu thêm hoặc tăng trọng số data này, behavior mục tiêu có cải thiện không?
+We ask whether adding or upweighting this data would improve the target behavior.
+
+82
+00:07:08,359 --> 00:07:14,206
+Literature về data valuation, như Data Shapley, cũng cho một góc nhìn liên quan.
+Literature on data valuation, such as Data Shapley, also gives a related view.
+
+83
+00:07:14,206 --> 00:07:19,119
+Data có value cao có thể gợi ý ta nên acquire thêm dữ liệu cùng kiểu.
+High-value data can suggest what kind of data to acquire next.
+
+84
+00:07:19,119 --> 00:07:26,194
+Data có value thấp bất thường có thể là outlier, corrupted example, hoặc label cần kiểm
+tra lại.
+Unusually low-value data can be an outlier, a corrupted example, or a label that needs
+checking.
+
+85
+00:07:26,194 --> 00:07:31,231
+Tuy nhiên dataset selection cũng là nơi dễ bị overfit vào metric.
+However, dataset selection is also where it is easy to overfit to a metric.
+
+86
+00:07:31,231 --> 00:07:39,485
+Nếu ta chọn data chỉ để cải thiện một benchmark, model có thể tốt lên trên benchmark đó
+nhưng tệ hơn ở nơi khác.
+If we select data only to improve one benchmark, the model may get better on that
+benchmark but worse elsewhere.
+
+87
+00:07:39,485 --> 00:07:51,424
+Vì vậy một workflow tốt thường có ba lớp: chọn data theo attribution, train hoặc
+fine-tune model, rồi kiểm tra trên held-out behaviors không dùng để chọn data.
+So a good workflow usually has three layers: select data by attribution, train or
+fine-tune the model, then test on held-out behaviors that were not used for selection.
+
+88
+00:07:51,424 --> 00:07:57,247
+Nói cách khác, data selection không nên chỉ là "sort theo score rồi lấy top".
+In other words, data selection should not just be "sort by score and take the top."
+
+89
+00:07:57,247 --> 00:08:03,683
+Nó nên là một vòng lặp: score, chọn subset, train, evaluate, rồi cập nhật lại mục tiêu.
+It should be a loop: score, choose a subset, train, evaluate, then update the objective.
+
+90
+00:08:03,683 --> 00:08:06,202
+Ứng dụng thứ ba là data valuation.
+The third application is data valuation.
+
+91
+00:08:06,202 --> 00:08:13,804
+Ở đây câu hỏi không phải "data nào giúp debug lỗi?", cũng không hẳn là "data nào nên
+thêm vào model?".
+Here the question is not "which data helps debug the failure?", and not exactly "which
+data should be added to the model?"
+
+92
+00:08:13,804 --> 00:08:20,240
+Câu hỏi là: nếu nhiều bên đóng góp dữ liệu, giá trị hoặc credit nên được phân bổ như thế
+nào?
+The question is: if many parties contribute data, how should value or credit be
+allocated?
+
+93
+00:08:20,240 --> 00:08:23,528
+Đây là nơi game-theoretic attribution trở lại.
+This is where game-theoretic attribution returns.
+
+94
+00:08:23,528 --> 00:08:34,371
+Nếu ta có một utility function, ví dụ accuracy, revenue, win rate, hoặc một metric chất
+lượng, ta có thể hỏi mỗi contributor đóng góp bao nhiêu vào utility đó.
+If we have a utility function, such as accuracy, revenue, win rate, or a quality metric,
+we can ask how much each contributor adds to that utility.
+
+95
+00:08:34,371 --> 00:08:41,577
+Shapley value là một lý tưởng đẹp vì nó trung bình marginal contribution qua nhiều
+context khác nhau.
+Shapley value is an elegant ideal because it averages marginal contribution across many
+different contexts.
+
+96
+00:08:41,577 --> 00:09:03,777
+Trong Data Shapley, trực giác này được đưa vào machine learning: giá trị của một datum
+được đo qua đóng góp của nó vào performance của predictor, đồng thời cố gắng giữ các
+nguyên tắc valuation tự nhiên như dữ liệu giống nhau nên nhận credit giống nhau, và dữ
+liệu không làm đổi utility thì không nên nhận credit lớn.
+In Data Shapley, this intuition is brought into machine learning: the value of a datum
+is measured through its contribution to predictor performance, while trying to preserve
+natural valuation principles such as identical data receiving identical credit, and data
+that does not change utility not receiving large credit.
+
+97
+00:09:03,777 --> 00:09:09,047
+Nhưng trong thực tế, data valuation cực kỳ nhạy với định nghĩa utility.
+But in practice, data valuation is extremely sensitive to the definition of utility.
+
+98
+00:09:09,047 --> 00:09:15,390
+Một dataset có thể rất có giá trị cho task y tế, nhưng gần như vô dụng cho task dịch
+máy.
+A dataset may be very valuable for a medical task, but almost useless for machine
+translation.
+
+99
+00:09:15,390 --> 00:09:25,161
+Một contributor có thể đóng góp rất nhiều examples, nhưng nếu hầu hết là duplicates của
+data đã có, marginal contribution thật sự có thể thấp.
+A contributor may provide many examples, but if most are duplicates of data already
+present, the real marginal contribution can be low.
+
+100
+00:09:25,161 --> 00:09:33,742
+Ngược lại, một contributor nhỏ có thể cung cấp một nhóm dữ liệu hiếm, làm model cải
+thiện mạnh trên một subgroup quan trọng.
+Conversely, a small contributor may provide a rare data group that strongly improves the
+model on an important subgroup.
+
+101
+00:09:33,742 --> 00:09:40,038
+Vì vậy data valuation không nên được hiểu là "dữ liệu này có giá trị tuyệt đối bao
+nhiêu?".
+So data valuation should not be understood as "what is the absolute value of this data?"
+
+102
+00:09:40,038 --> 00:09:47,664
+Nó nên được hiểu là: đối với utility này, trong bối cảnh dữ liệu hiện tại, contribution
+của data này là gì?
+It should be understood as: for this utility, in the current data context, what is the
+contribution of this data?
+
+103
+00:09:47,664 --> 00:09:51,115
+Điểm này cũng giúp tránh một hiểu lầm phổ biến.
+This point also helps avoid a common misunderstanding.
+
+104
+00:09:51,115 --> 00:09:55,919
+Fair credit và predictive usefulness không phải lúc nào cũng giống nhau.
+Fair credit and predictive usefulness are not always the same.
+
+105
+00:09:55,919 --> 00:10:05,713
+Một attribution method có thể dự đoán rất tốt behavior khi remove data, nhưng chưa chắc
+thỏa mãn các axioms công bằng mà ta muốn cho payment.
+An attribution method may predict behavior very well when data is removed, but it may
+not satisfy the fairness axioms we want for payment.
+
+106
+00:10:05,713 --> 00:10:15,110
+Ngược lại, một credit allocation rất đẹp về mặt fairness có thể quá đắt hoặc quá noisy
+để dùng trong pipeline selection hằng ngày.
+Conversely, a credit allocation that is beautiful from a fairness perspective may be too
+expensive or too noisy for a daily selection pipeline.
+
+107
+00:10:15,110 --> 00:10:17,326
+Ứng dụng quyết định tradeoff.
+The application decides the tradeoff.
+
+108
+00:10:17,326 --> 00:10:20,598
+Ứng dụng thứ tư là data poisoning và security.
+The fourth application is data poisoning and security.
+
+109
+00:10:20,598 --> 00:10:31,578
+Trong data poisoning, attacker chèn vào training data những examples được thiết kế để
+làm model sai, mở backdoor, hoặc thiên lệch theo một hướng có lợi cho attacker.
+In data poisoning, an attacker inserts training examples designed to make the model
+fail, open a backdoor, or bias it in a direction that benefits the attacker.
+
+110
+00:10:31,578 --> 00:10:45,898
+Một số attack hiện đại còn nguy hiểm hơn vì chúng có thể clean-label: nhìn bằng mắt thì
+label vẫn hợp lý, nhưng example được chỉnh rất tinh vi để gradient kéo model về một
+target sai trong quá trình training.
+Some modern attacks are more dangerous because they can be clean-label: to a human, the
+label still looks reasonable, but the example is subtly modified so its gradient pulls
+the model toward a wrong target during training.
+
+111
+00:10:45,898 --> 00:10:48,878
+Attribution có thể giúp defense theo hai cách.
+Attribution can help defense in two ways.
+
+112
+00:10:48,878 --> 00:10:55,131
+Cách thứ nhất là truy vết từ behavior xấu về những training examples có ảnh hưởng bất
+thường.
+The first way is tracing from bad behavior back to training examples with abnormal
+influence.
+
+113
+00:10:55,131 --> 00:11:02,167
+Nếu một nhóm nhỏ data có score rất cao đối với một failure mode cụ thể, đó có thể là tín
+hiệu cần audit.
+If a small group of data has a very high score for a specific failure mode, that may be
+a signal to audit.
+
+114
+00:11:02,167 --> 00:11:05,574
+Cách thứ hai là phát hiện outliers trong ảnh hưởng.
+The second way is detecting outliers in influence.
+
+115
+00:11:05,574 --> 00:11:09,316
+Một data point bình thường có thể hơi giúp hoặc hơi hại.
+A normal data point may help a little or hurt a little.
+
+116
+00:11:09,316 --> 00:11:16,621
+Nhưng một data point có tác động quá lớn, nhất là lên một target behavior nhạy cảm, đáng
+được kiểm tra kỹ.
+But a data point with too large an effect, especially on a sensitive target behavior,
+deserves careful inspection.
+
+117
+00:11:16,621 --> 00:11:19,311
+Tuy nhiên đây là phần cần nói cẩn thận.
+However, this part must be said carefully.
+
+118
+00:11:19,311 --> 00:11:21,865
+Attribution trong security là dual-use.
+Attribution in security is dual-use.
+
+119
+00:11:21,865 --> 00:11:30,986
+Nó có thể giúp defender tìm data độc hại, nhưng cũng có thể giúp attacker hiểu điểm nào
+có ảnh hưởng lớn và tối ưu attack tốt hơn.
+It can help defenders find malicious data, but it can also help attackers understand
+which points have large influence and optimize attacks better.
+
+120
+00:11:30,986 --> 00:11:36,476
+Vì vậy trong ứng dụng security, ta không chỉ hỏi estimator có chính xác không.
+Therefore in security applications, we do not only ask whether the estimator is
+accurate.
+
+121
+00:11:36,476 --> 00:11:39,098
+Ta còn hỏi: ai được quyền xem score?
+We also ask: who is allowed to see the score?
+
+122
+00:11:39,098 --> 00:11:41,339
+Score được aggregate ở mức nào?
+At what level is the score aggregated?
+
+123
+00:11:41,339 --> 00:11:43,446
+Có cần privacy protection không?
+Do we need privacy protection?
+
+124
+00:11:43,446 --> 00:11:47,188
+Có thể bị dùng để reverse engineer training data hay không?
+Can it be used to reverse engineer training data?
+
+125
+00:11:47,188 --> 00:11:51,132
+Nói cách khác, security không chỉ là một use case kỹ thuật.
+In other words, security is not only a technical use case.
+
+126
+00:11:51,132 --> 00:11:54,606
+Nó là nơi data attribution phải đi kèm governance.
+It is where data attribution must come with governance.
+
+127
+00:11:54,606 --> 00:11:57,394
+Ứng dụng thứ năm là machine unlearning.
+The fifth application is machine unlearning.
+
+128
+00:11:57,394 --> 00:12:06,652
+Giả sử có một forget set F: một người dùng yêu cầu xóa dữ liệu, một license thay đổi,
+hoặc một phần data được phát hiện là không nên dùng.
+Suppose there is a forget set F: a user requests data deletion, a license changes, or
+part of the data is found to be unsuitable.
+
+129
+00:12:06,652 --> 00:12:13,281
+Câu hỏi lý tưởng là: nếu ta train model từ đầu trên S trừ F, model behavior sẽ như thế
+nào?
+The ideal question is: if we trained the model from scratch on S without F, how would
+model behavior change?
+
+130
+00:12:13,281 --> 00:12:16,459
+Đó là một câu hỏi counterfactual rất tự nhiên.
+That is a very natural counterfactual question.
+
+131
+00:12:16,459 --> 00:12:22,379
+Nhưng với model lớn, retrain từ đầu mỗi khi có yêu cầu unlearning có thể quá đắt.
+But with large models, retraining from scratch for every unlearning request can be too
+expensive.
+
+132
+00:12:22,379 --> 00:12:36,894
+Một hướng như SISA training cố giảm chi phí này bằng cách chia training thành shard và
+slice, để khi cần quên một data point, ta chỉ phải cập nhật một phần nhỏ hơn của hệ
+thống thay vì toàn bộ model.
+One direction such as SISA training tries to reduce this cost by splitting training into
+shards and slices, so that when one data point must be forgotten, only a smaller part of
+the system needs to be updated instead of the entire model.
+
+133
+00:12:36,894 --> 00:12:45,420
+Data attribution không tự động giải quyết machine unlearning, nhưng nó giúp ta ước lượng
+và kiểm tra tác động của việc quên.
+Data attribution does not automatically solve machine unlearning, but it helps us
+estimate and test the impact of forgetting.
+
+134
+00:12:45,420 --> 00:12:51,135
+Predictive attribution có thể dự đoán remove F sẽ làm behavior nào thay đổi nhiều.
+Predictive attribution can forecast which behaviors will change a lot if F is removed.
+
+135
+00:12:51,135 --> 00:12:56,827
+Influence-style methods có thể cho một approximation nhanh khi giả định đủ ổn.
+Influence-style methods can give a fast approximation when the assumptions are stable
+enough.
+
+136
+00:12:56,827 --> 00:13:04,873
+Datamodels có thể học map từ subset hoặc group removal sang behavior, nếu ta có đủ
+training runs để học surrogate.
+Datamodels can learn a map from subset or group removal to behavior, if we have enough
+training runs to learn the surrogate.
+
+137
+00:13:04,873 --> 00:13:08,850
+Nhưng trong unlearning, tiêu chuẩn đánh giá phải rất rõ.
+But in unlearning, the evaluation standard must be very clear.
+
+138
+00:13:08,850 --> 00:13:13,468
+Ta không chỉ cần model "trông giống đã quên" trên một vài examples.
+We do not only need the model to "look forgotten" on a few examples.
+
+139
+00:13:13,468 --> 00:13:24,920
+Ta cần kiểm tra utility còn giữ được không, privacy hoặc compliance có đạt không, và
+model có còn nhớ thông tin của forget set theo các attack probes hay không.
+We need to check whether utility is preserved, whether privacy or compliance is
+satisfied, and whether the model still remembers information from the forget set under
+attack probes.
+
+140
+00:13:24,920 --> 00:13:30,566
+Vì vậy attribution ở đây là một phần của pipeline, không phải giấy chứng nhận cuối cùng.
+So attribution here is part of the pipeline, not the final certificate.
+
+141
+00:13:30,566 --> 00:13:33,286
+Nó giúp ta ưu tiên, dự đoán, và audit.
+It helps us prioritize, predict, and audit.
+
+142
+00:13:33,286 --> 00:13:37,241
+Nhưng quyết định unlearning vẫn cần evaluation độc lập.
+But the unlearning decision still needs independent evaluation.
+
+143
+00:13:37,241 --> 00:13:42,313
+Ứng dụng tiếp theo là citation, RAG, và copyright-related analysis.
+The next application is citation, RAG, and copyright-related analysis.
+
+144
+00:13:42,313 --> 00:13:46,192
+Đây là nơi corroborative attribution rất tự nhiên.
+This is where corroborative attribution is very natural.
+
+145
+00:13:46,192 --> 00:13:54,073
+Khi một language model tạo ra một câu trả lời, người dùng thường hỏi: câu trả lời này
+được hỗ trợ bởi nguồn nào?
+When a language model produces an answer, users often ask: which sources support this
+answer?
+
+146
+00:13:54,073 --> 00:13:57,331
+Trong RAG, model đã có một retrieval step.
+In RAG, the model already has a retrieval step.
+
+147
+00:13:57,331 --> 00:14:01,756
+Nhưng retrieval không tự động có nghĩa là citation đúng.
+But retrieval does not automatically mean the citation is correct.
+
+148
+00:14:01,756 --> 00:14:07,301
+Một document có thể được retrieve nhưng không thực sự hỗ trợ claim cuối cùng.
+A document may be retrieved but not actually support the final claim.
+
+149
+00:14:07,301 --> 00:14:13,840
+Ngược lại, một claim trong output có thể cần nhiều sources kết hợp mới đủ evidence.
+Conversely, one claim in the output may need several sources together to provide enough
+evidence.
+
+150
+00:14:13,840 --> 00:14:21,597
+Và ngay cả khi citation đúng về mặt nội dung, vẫn còn một câu hỏi khó hơn: citation đó
+có faithful không?
+And even when a citation is correct in content, there is a harder question: is that
+citation faithful?
+
+151
+00:14:21,597 --> 00:14:31,021
+Nghĩa là model thật sự dựa vào source đó khi tạo claim, hay source chỉ được gắn vào sau
+như một lời giải thích hợp lý?
+Meaning, did the model actually rely on that source when generating the claim, or was
+the source attached afterward as a plausible explanation?
+
+152
+00:14:31,021 --> 00:14:39,275
+Corroborative attribution cố gắng nối từng output, claim, hoặc span với những evidence
+candidates trong corpus.
+Corroborative attribution tries to connect each output, claim, or span with evidence
+candidates in the corpus.
+
+153
+00:14:39,275 --> 00:14:42,955
+Ứng dụng này khác với predictive attribution.
+This application is different from predictive attribution.
+
+154
+00:14:42,955 --> 00:14:49,942
+Ta không hỏi nếu remove document này khỏi training data thì model behavior thay đổi ra
+sao.
+We are not asking how model behavior would change if this document were removed from
+training data.
+
+155
+00:14:49,942 --> 00:14:56,257
+Ta hỏi document này có hỗ trợ, phản bác, hay liên quan đến output hiện tại không.
+We are asking whether this document supports, contradicts, or relates to the current
+output.
+
+156
+00:14:56,257 --> 00:15:03,592
+Với copyright detection cũng vậy, câu hỏi thường không phải utility hay counterfactual
+behavior.
+For copyright detection, it is similar: the question is usually not utility or
+counterfactual behavior.
+
+157
+00:15:03,592 --> 00:15:08,366
+Câu hỏi là output có quá gần một source trong corpus không?
+The question is whether the output is too close to a source in the corpus.
+
+158
+00:15:08,366 --> 00:15:10,753
+Có dấu hiệu reproduction không?
+Is there evidence of reproduction?
+
+159
+00:15:10,753 --> 00:15:13,761
+Đoạn nào là evidence cho nghi ngờ đó?
+Which passage is the evidence for that concern?
+
+160
+00:15:13,761 --> 00:15:19,132
+Vì vậy citation và copyright là ví dụ rất tốt cho việc chọn đúng lens.
+So citation and copyright are very good examples of choosing the right lens.
+
+161
+00:15:19,132 --> 00:15:24,751
+Nếu dùng game-theoretic credit để giải thích citation, ta có thể nói sai.
+If we use game-theoretic credit to explain citation, we can say the wrong thing.
+
+162
+00:15:24,751 --> 00:15:31,190
+Nếu dùng retrieval similarity để kết luận causal influence, ta cũng có thể nói sai.
+If we use retrieval similarity to conclude causal influence, we can also say the wrong
+thing.
+
+163
+00:15:31,190 --> 00:15:38,998
+Một hệ thống tốt cần tách rõ: evidence cho output, credit cho utility, và prediction cho
+intervention.
+A good system must separate clearly: evidence for output, credit for utility, and
+prediction for intervention.
+
+164
+00:15:38,998 --> 00:15:42,626
+Đến đây, ta có thể tóm lại các pitfalls quan trọng.
+At this point, we can summarize the important pitfalls.
+
+165
+00:15:42,626 --> 00:15:45,561
+Pitfall thứ nhất: nhầm evidence với cause.
+Pitfall one: confusing evidence with cause.
+
+166
+00:15:45,561 --> 00:15:51,871
+Một source hỗ trợ một claim không nhất thiết là nguyên nhân khiến model tạo ra claim đó.
+A source supporting a claim is not necessarily the cause that made the model generate
+that claim.
+
+167
+00:15:51,871 --> 00:16:00,792
+Nó có thể chỉ là một tài liệu cùng nói về sự thật đó, hoặc một passage được retrieve sau
+khi model đã có xu hướng trả lời như vậy.
+It may only be a document that states the same fact, or a passage retrieved after the
+model already tended to answer that way.
+
+168
+00:16:00,792 --> 00:16:12,625
+Với RAG, đây là khác biệt giữa citation correctness và citation faithfulness: source có
+thể support câu trả lời, nhưng chưa chắc là source mà model thật sự relied on.
+With RAG, this is the difference between citation correctness and citation faithfulness:
+a source may support the answer, but it may not be the source the model actually relied
+on.
+
+169
+00:16:12,625 --> 00:16:15,653
+Pitfall thứ hai: nhầm similarity với value.
+Pitfall two: confusing similarity with value.
+
+170
+00:16:15,653 --> 00:16:24,805
+Data gần target về mặt embedding có thể hữu ích cho retrieval, nhưng chưa chắc có
+marginal contribution cao cho training.
+Data that is close to the target in embedding space can be useful for retrieval, but it
+does not necessarily have high marginal contribution for training.
+
+171
+00:16:24,805 --> 00:16:28,734
+Pitfall thứ ba: nhầm fair credit với predictive effect.
+Pitfall three: confusing fair credit with predictive effect.
+
+172
+00:16:28,734 --> 00:16:32,501
+Một score dùng để chia payment cần tiêu chí công bằng.
+A score used to divide payment needs fairness criteria.
+
+173
+00:16:32,501 --> 00:16:36,222
+Một score dùng để chọn data cần dự đoán improvement.
+A score used to select data needs to predict improvement.
+
+174
+00:16:36,222 --> 00:16:39,735
+Hai mục tiêu này có thể dẫn đến hai method khác nhau.
+These two goals may lead to different methods.
+
+175
+00:16:39,735 --> 00:16:44,473
+Pitfall thứ tư: quên rằng unit of attribution thay đổi kết luận.
+Pitfall four: forgetting that the unit of attribution changes the conclusion.
+
+176
+00:16:44,473 --> 00:16:51,013
+Một document có thể có score thấp, nhưng một paragraph trong document đó lại cực kỳ quan
+trọng.
+A document can have a low score, while one paragraph in that document is extremely
+important.
+
+177
+00:16:51,013 --> 00:16:56,421
+Một data point có thể score thấp, nhưng cả cluster của nó lại có tác động lớn.
+A data point can have a low score, while its whole cluster has a large effect.
+
+178
+00:16:56,421 --> 00:17:00,119
+Pitfall thứ năm: bỏ qua evaluation sau khi hành động.
+Pitfall five: skipping evaluation after taking action.
+
+179
+00:17:00,119 --> 00:17:04,626
+Nếu ta remove data theo attribution score, cần đo lại model.
+If we remove data by attribution score, we need to measure the model again.
+
+180
+00:17:04,626 --> 00:17:10,959
+Nếu ta cite source theo corroborative score, cần kiểm tra claim có thật sự được support.
+If we cite a source by corroborative score, we need to check whether the claim is truly
+supported.
+
+181
+00:17:10,959 --> 00:17:14,841
+Nếu ta unlearn, cần kiểm tra cả utility và forgetting.
+If we unlearn, we need to check both utility and forgetting.
+
+182
+00:17:14,841 --> 00:17:20,920
+Vì vậy thông điệp thực dụng nhất của Part IV là: attribution score không phải đích đến.
+So the most practical message of Part IV is: an attribution score is not the
+destination.
+
+183
+00:17:20,920 --> 00:17:25,473
+Nó là một proposal để hành động, và hành động đó phải được kiểm tra.
+It is a proposal for action, and that action must be checked.
+
+184
+00:17:25,473 --> 00:17:27,180
+Hãy gom lại Part IV.
+Let us gather Part IV together.
+
+185
+00:17:27,180 --> 00:17:34,368
+Model debugging dùng attribution để rút ngắn đường từ một lỗi cụ thể về những data cần
+kiểm tra.
+Model debugging uses attribution to shorten the path from a specific failure to the data
+that needs inspection.
+
+186
+00:17:34,368 --> 00:17:43,452
+Nó cũng giúp audit brittle predictions và train-test leakage, miễn là ta không nhầm
+semantic similarity với nguyên nhân thật.
+It also helps audit brittle predictions and train-test leakage, as long as we do not
+confuse semantic similarity with the real cause.
+
+187
+00:17:43,452 --> 00:17:54,909
+Dataset selection dùng attribution để ưu tiên data có khả năng cải thiện behavior mục
+tiêu, hoặc phát hiện data nên acquire, clean, hay loại khỏi pipeline.
+Dataset selection uses attribution to prioritize data that may improve the target
+behavior, or to detect data that should be acquired, cleaned, or removed from the
+pipeline.
+
+188
+00:17:54,909 --> 00:18:06,176
+Data valuation dùng attribution để phân bổ credit cho contributors hoặc datasets, nhưng
+luôn phụ thuộc utility, context, và các tiêu chí fairness ta chọn.
+Data valuation uses attribution to allocate credit to contributors or datasets, but it
+always depends on the utility, the context, and the fairness criteria we choose.
+
+189
+00:18:06,176 --> 00:18:18,771
+Data poisoning dùng attribution để audit những data có ảnh hưởng xấu bất thường, đồng
+thời nhắc ta về tính dual-use của score: score tốt cho defender cũng có thể giúp
+attacker.
+Data poisoning uses attribution to audit data with abnormal harmful influence, while
+reminding us that the score is dual-use: a score that helps defenders can also help
+attackers.
+
+190
+00:18:18,771 --> 00:18:29,659
+Machine unlearning dùng attribution để dự đoán và kiểm tra tác động của việc quên một
+forget set, nhưng attribution không tự nó là chứng nhận unlearning.
+Machine unlearning uses attribution to predict and test the impact of forgetting a
+forget set, but attribution is not itself a certificate of unlearning.
+
+191
+00:18:29,659 --> 00:18:41,685
+Citation, RAG, và copyright dùng corroborative attribution để nối output với evidence
+candidates trong corpus, đồng thời phải phân biệt support với faithful reliance.
+Citation, RAG, and copyright use corroborative attribution to connect outputs with
+evidence candidates in the corpus, while also distinguishing support from faithful
+reliance.
+
+192
+00:18:41,685 --> 00:18:47,093
+Những ứng dụng này rất khác nhau, nhưng chúng cùng tuân theo một nguyên tắc.
+These applications are very different, but they follow one shared principle.
+
+193
+00:18:47,093 --> 00:18:48,872
+Đừng bắt đầu từ method.
+Do not start from the method.
+
+194
+00:18:48,872 --> 00:18:51,244
+Hãy bắt đầu từ câu hỏi ứng dụng.
+Start from the application question.
+
+195
+00:18:51,244 --> 00:18:52,952
+Bạn cần evidence?
+Do you need evidence?
+
+196
+00:18:52,952 --> 00:18:54,660
+Bạn cần credit?
+Do you need credit?
+
+197
+00:18:54,660 --> 00:18:58,384
+Hay bạn cần dự đoán behavior sau một intervention?
+Or do you need to predict behavior after an intervention?
+
+198
+00:18:58,384 --> 00:19:04,741
+Khi trả lời được câu đó, ta mới biết nên dùng lens nào, estimator nào, và evaluation
+nào.
+Once we can answer that, we know which lens, which estimator, and which evaluation to
+use.
+
+199
+00:19:04,741 --> 00:19:12,283
+Đó cũng là thông điệp cuối của toàn bộ tutorial: data attribution at scale không phải là
+một score duy nhất.
+That is also the final message of the whole tutorial: data attribution at scale is not a
+single score.
+
+200
+00:19:12,283 --> 00:19:18,213
+Nó là một cách đặt câu hỏi có kỷ luật về quan hệ giữa data và model behavior.
+It is a disciplined way to ask questions about the relationship between data and model
+behavior.
+
+201
+00:19:18,213 --> 00:19:29,267
+Ở epilogue, ta sẽ gom lại bức tranh này thành một bản đồ ngắn: ba lens, hai bài học về
+scale, và một nguyên tắc để dùng attribution một cách có trách nhiệm.
+In the epilogue, we will gather this picture into a short map: three lenses, two lessons
+about scale, and one principle for using attribution responsibly.

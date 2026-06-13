@@ -1,0 +1,1289 @@
+1
+00:00:00,000 --> 00:00:03,625
+Ở Part I, ta đã có ba lens để nhìn data attribution.
+In Part I, we had three lenses for data attribution.
+
+2
+00:00:03,625 --> 00:00:08,477
+Corroborative attribution hỏi: output này được hỗ trợ bởi evidence nào?
+Corroborative attribution asks: what evidence supports this output?
+
+3
+00:00:08,477 --> 00:00:13,722
+Game-theoretic attribution hỏi: nếu nhiều data point cùng tạo ra một utility,
+Game-theoretic attribution asks: if many data points create one utility,
+
+4
+00:00:13,722 --> 00:00:15,698
+credit nên được chia ra sao?
+how should credit be divided?
+
+5
+00:00:15,698 --> 00:00:20,613
+Predictive attribution hỏi một câu khác: nếu training data thay đổi,
+Predictive attribution asks a different question: if training data changes,
+
+6
+00:00:20,613 --> 00:00:23,134
+model behavior sẽ thay đổi như thế nào?
+how will model behavior change?
+
+7
+00:00:23,134 --> 00:00:25,833
+Part II bắt đầu từ câu hỏi thứ ba này.
+Part II starts from this third question.
+
+8
+00:00:25,833 --> 00:00:28,023
+Lý do là, nếu không có theory,
+The reason is that without theory,
+
+9
+00:00:28,023 --> 00:00:34,253
+một attribution score rất dễ trở thành một con số nghe có vẻ hợp lý nhưng khó kiểm chứng.
+an attribution score can easily become a plausible-sounding number that is hard to verify.
+
+10
+00:00:34,253 --> 00:00:39,309
+Ta có thể nói một data point "quan trọng", nhưng quan trọng theo nghĩa nào?
+We can say a data point is "important", but important in what sense?
+
+11
+00:00:39,309 --> 00:00:40,928
+Nó làm loss giảm?
+Does it reduce loss?
+
+12
+00:00:40,928 --> 00:00:43,427
+Nó làm một test example đổi nhãn?
+Does it flip the label of a test example?
+
+13
+00:00:43,427 --> 00:00:47,804
+Nó giúp accuracy tổng thể, hay chỉ giúp một nhóm dữ liệu nhỏ?
+Does it improve overall accuracy, or only help a small data group?
+
+14
+00:00:47,804 --> 00:00:53,426
+Và nếu ta thật sự bỏ nó ra khỏi training set, chuyện dự đoán kia có xảy ra không?
+And if we actually remove it from the training set, does that prediction happen?
+
+15
+00:00:53,426 --> 00:00:58,404
+Vì vậy, trong phần này, ta sẽ biến trực giác thành một bài toán rõ ràng hơn:
+So in this part, we will turn intuition into a clearer problem:
+
+16
+00:00:58,404 --> 00:01:03,788
+training data đi vào learning algorithm như thế nào, thay đổi data nghĩa là gì,
+how training data enters the learning algorithm, what changing data means,
+
+17
+00:01:03,788 --> 00:01:09,800
+và làm sao dự đoán counterfactual behavior mà không cần train lại model từ đầu quá nhiều
+and how to predict counterfactual behavior without too much retraining from scratch
+
+18
+00:01:09,800 --> 00:01:11,419
+lần.
+times.
+
+19
+00:01:11,419 --> 00:01:16,604
+Một điểm đáng chú ý là: phần theory này không bắt đầu từ deep learning.
+One notable point is: this theory does not start from deep learning.
+
+20
+00:01:16,604 --> 00:01:19,590
+Nó có một statistical analog khá lâu đời.
+It has a fairly old statistical analog.
+
+21
+00:01:19,590 --> 00:01:26,257
+Trong thống kê, người ta đã quan tâm từ rất sớm đến câu hỏi: nếu dataset thay đổi một chút,
+In statistics, people have long cared about the question: if a dataset changes slightly,
+
+22
+00:01:26,257 --> 00:01:28,481
+estimator sẽ thay đổi thế nào?
+how will the estimator change?
+
+23
+00:01:28,481 --> 00:01:34,644
+Ví dụ, nếu ta bỏ một quan sát ra khỏi regression, coefficient có đổi nhiều không?
+For example, if we remove one observation from regression, do coefficients change much?
+
+24
+00:01:34,644 --> 00:01:39,843
+Nếu ta tăng trọng số của một sample, estimate có dịch đáng kể không?
+If we increase the weight of a sample, does the estimate shift noticeably?
+
+25
+00:01:39,843 --> 00:01:45,489
+Nếu một điểm dữ liệu là outlier, nó có làm kết luận thống kê bị kéo lệch không?
+If a data point is an outlier, does it skew the statistical conclusion?
+
+26
+00:01:45,489 --> 00:01:52,125
+Những câu hỏi đó dẫn đến các ý tưởng như leave-one-out diagnostics, infinitesimal jackknife,
+Those questions led to ideas like leave-one-out diagnostics, infinitesimal jackknife,
+
+27
+00:01:52,125 --> 00:01:53,856
+và influence functions.
+and influence functions.
+
+28
+00:01:53,856 --> 00:01:56,456
+Nhưng có một khác biệt quan trọng.
+But there is an important difference.
+
+29
+00:01:56,456 --> 00:02:01,951
+Trong statistical analog cổ điển, target thường là parameter prediction:
+In the classical statistical analog, the target is often parameter prediction:
+
+30
+00:02:01,951 --> 00:02:05,679
+ta dự đoán parameter của estimator thay đổi ra sao.
+we predict how the estimator's parameter changes.
+
+31
+00:02:05,679 --> 00:02:11,505
+Còn trong data attribution cho machine learning, nhất là predictive attribution,
+In data attribution for machine learning, especially predictive attribution,
+
+32
+00:02:11,505 --> 00:02:18,220
+target mà người dùng thật sự quan tâm thường là behavior prediction: output, loss, accuracy,
+the target users really care about is often behavior prediction: output, loss, accuracy,
+
+33
+00:02:18,220 --> 00:02:23,060
+robustness, fairness, hoặc một metric cụ thể trên downstream task.
+robustness, fairness, or a specific metric on a downstream task.
+
+34
+00:02:23,060 --> 00:02:27,544
+Parameter vẫn quan trọng, nhưng nó chỉ là tầng trung gian.
+Parameters still matter, but they are only an intermediate layer.
+
+35
+00:02:27,544 --> 00:02:33,376
+Nếu parameter đổi rất nhiều mà behavior không đổi, người dùng có thể không quan tâm.
+If parameters change a lot but behavior does not, users may not care.
+
+36
+00:02:33,376 --> 00:02:35,098
+Ngược lại,
+Conversely,
+
+37
+00:02:35,098 --> 00:02:41,583
+một thay đổi parameter nhỏ nhưng làm một nhóm prediction đổi mạnh lại rất quan trọng.
+a small parameter change that strongly changes a group of predictions can be very important.
+
+38
+00:02:41,583 --> 00:02:46,216
+Vì vậy, khi ta mượn theory từ thống kê sang ML, ta phải nhớ:
+So when we borrow theory from statistics into ML, we must remember:
+
+39
+00:02:46,216 --> 00:02:49,568
+công thức có thể bắt đầu trong parameter space,
+the formulas may begin in parameter space,
+
+40
+00:02:49,568 --> 00:02:53,636
+nhưng mục tiêu cuối cùng của video này là model behavior.
+but the final goal of this video is model behavior.
+
+41
+00:02:53,636 --> 00:02:56,550
+Framework đầu tiên là M-estimation.
+The first framework is M-estimation.
+
+42
+00:02:56,550 --> 00:03:00,405
+Nghe tên hơi khô, nhưng ý tưởng rất tự nhiên:
+The name sounds dry, but the idea is very natural:
+
+43
+00:03:00,405 --> 00:03:04,741
+ta xem model như nghiệm của một bài toán tối ưu.
+we view the model as the solution of an optimization problem.
+
+44
+00:03:04,741 --> 00:03:08,203
+Mỗi training sample tạo ra một loss riêng.
+Each training sample creates its own loss.
+
+45
+00:03:08,203 --> 00:03:12,531
+Nếu sample đó được dùng đầy đủ, trọng số của nó là một.
+If that sample is fully used, its weight is one.
+
+46
+00:03:12,531 --> 00:03:16,482
+Nếu sample đó bị bỏ ra, trọng số của nó là không.
+If that sample is removed, its weight is zero.
+
+47
+00:03:16,482 --> 00:03:22,485
+Nếu ta chỉ muốn giảm ảnh hưởng của nó, trọng số nằm giữa không và một.
+If we only want to reduce its influence, the weight lies between zero and one.
+
+48
+00:03:22,485 --> 00:03:28,401
+Và nếu ta muốn upweight một nhóm dữ liệu, trọng số có thể lớn hơn một.
+And if we want to upweight a data group, the weight can be larger than one.
+
+49
+00:03:28,401 --> 00:03:34,228
+Nói cách khác, thay vì chỉ nghĩ training set là một danh sách cố định,
+In other words, instead of thinking of the training set as a fixed list,
+
+50
+00:03:34,228 --> 00:03:37,690
+ta gắn với nó một weight vector, gọi là w.
+we attach to it a weight vector, called w.
+
+51
+00:03:37,690 --> 00:03:41,303
+Khi w thay đổi, bài toán tối ưu thay đổi.
+When w changes, the optimization problem changes.
+
+52
+00:03:41,303 --> 00:03:46,288
+Khi bài toán tối ưu thay đổi, nghiệm của nó cũng thay đổi.
+When the optimization problem changes, its solution also changes.
+
+53
+00:03:46,288 --> 00:03:52,212
+Nghiệm đó là parameter của model, thường được ký hiệu là theta star của w.
+That solution is the model parameter, often denoted theta star of w.
+
+54
+00:03:52,212 --> 00:03:54,525
+Đây là bước rất quan trọng:
+This is a very important step:
+
+55
+00:03:54,525 --> 00:04:01,381
+data attribution không còn là một cảm giác mơ hồ về "data nào giống output nào".
+data attribution is no longer a vague feeling about "which data looks like which output".
+
+56
+00:04:01,381 --> 00:04:08,310
+Nó trở thành câu hỏi về một hàm: nếu ta thay đổi weight vector w, theta star của w,
+It becomes a question about a function: if we change weight vector w, theta star of w,
+
+57
+00:04:08,310 --> 00:04:11,742
+và behavior của model, sẽ thay đổi ra sao?
+and model behavior, how will they change?
+
+58
+00:04:11,742 --> 00:04:17,592
+Trường hợp đơn giản nhất của weight vector là leave-one-out, thường viết tắt là LOO.
+The simplest case of a weight vector is leave-one-out, often abbreviated LOO.
+
+59
+00:04:17,592 --> 00:04:20,252
+Ta train model trên toàn bộ dataset.
+We train the model on the full dataset.
+
+60
+00:04:20,252 --> 00:04:25,930
+Sau đó ta bỏ một data point, ví dụ z j, train lại model, rồi so sánh kết quả.
+Then we remove one data point, say z j, retrain the model, and compare the results.
+
+61
+00:04:25,930 --> 00:04:29,071
+Nếu bỏ z j làm behavior thay đổi rất mạnh,
+If removing z j changes behavior very strongly,
+
+62
+00:04:29,071 --> 00:04:33,048
+ta nói z j có ảnh hưởng lớn đối với behavior đang xét.
+we say z j has a large effect on the behavior under study.
+
+63
+00:04:33,048 --> 00:04:37,794
+Nếu bỏ z j mà model gần như không đổi, thì influence của nó nhỏ.
+If removing z j barely changes the model, then its influence is small.
+
+64
+00:04:37,794 --> 00:04:41,405
+Điểm hay của leave-one-out là nó rất rõ ràng.
+The nice thing about leave-one-out is that it is very clear.
+
+65
+00:04:41,405 --> 00:04:44,799
+Nó không hỏi "data này nhìn có liên quan không".
+It does not ask "does this data look related?"
+
+66
+00:04:44,799 --> 00:04:50,433
+Nó hỏi một counterfactual cụ thể: trong một thế giới gần giống thế giới hiện tại,
+It asks a concrete counterfactual: in a world almost like the current one,
+
+67
+00:04:50,433 --> 00:04:53,133
+nhưng thiếu z j, model sẽ ra sao?
+but without z j, what would the model be like?
+
+68
+00:04:53,133 --> 00:04:56,343
+Nhưng điểm dở cũng rất rõ: nó quá đắt.
+But the downside is also very clear: it is too expensive.
+
+69
+00:04:56,343 --> 00:05:02,557
+Nếu dataset có một triệu điểm, exact leave-one-out nghĩa là train lại gần một triệu lần.
+With one million data points, exact leave-one-out means almost one million retrains.
+
+70
+00:05:02,557 --> 00:05:08,149
+Với deep learning, đặc biệt là foundation models, chuyện này gần như không thể.
+With deep learning, especially foundation models, this is almost impossible.
+
+71
+00:05:08,149 --> 00:05:13,758
+Vì vậy LOO đóng vai trò giống một mục tiêu vàng: dễ hiểu, đúng về mặt định nghĩa,
+So LOO acts like a gold target: easy to understand, definitionally clean,
+
+72
+00:05:13,758 --> 00:05:16,208
+nhưng quá tốn để tính trực tiếp.
+but too expensive to compute directly.
+
+73
+00:05:16,208 --> 00:05:21,724
+Các phương pháp theory trong Part II chủ yếu là những cách xấp xỉ mục tiêu này.
+The theory methods in Part II are mainly ways to approximate this target.
+
+74
+00:05:21,724 --> 00:05:27,933
+Để thấy vì sao theory có ích, tutorial bắt đầu với ví dụ dễ nhất: linear regression.
+To see why theory helps, the tutorial starts with the easiest example: linear regression.
+
+75
+00:05:27,933 --> 00:05:30,053
+Ta có các điểm dữ liệu x và y.
+We have data points x and y.
+
+76
+00:05:30,053 --> 00:05:34,765
+Model là một đường thẳng, hoặc tổng quát hơn là một linear predictor.
+The model is a line, or more generally a linear predictor.
+
+77
+00:05:34,765 --> 00:05:40,364
+Loss là squared error: dự đoán lệch y bao nhiêu thì bị phạt theo bình phương.
+The loss is squared error: prediction error from y is penalized quadratically.
+
+78
+00:05:40,364 --> 00:05:44,247
+Trong trường hợp này, nghiệm tối ưu có công thức đóng.
+In this case, the optimum has a closed-form solution.
+
+79
+00:05:44,247 --> 00:05:49,267
+Nghĩa là ta không cần tưởng tượng training như một hộp đen hoàn toàn.
+That means we do not need to imagine training as a complete black box.
+
+80
+00:05:49,267 --> 00:05:53,984
+Ta có thể viết nghiệm theta star trực tiếp bằng ma trận của dữ liệu.
+We can write theta star directly using matrices of the data.
+
+81
+00:05:53,984 --> 00:05:59,018
+Và khi bỏ một điểm dữ liệu ra, ta cũng không cần train lại từ đầu.
+And when removing a data point, we also do not need to retrain from scratch.
+
+82
+00:05:59,018 --> 00:06:01,467
+Nhờ công thức Sherman-Morrison,
+Thanks to the Sherman-Morrison formula,
+
+83
+00:06:01,467 --> 00:06:07,321
+việc "xóa một điểm" có thể được xem như một cập nhật hạng một trên ma trận ban đầu.
+"deleting a point" can be viewed as a rank-one update to the original matrix.
+
+84
+00:06:07,321 --> 00:06:12,371
+Chi tiết đại số có thể hơi nặng, nhưng thông điệp trực giác rất đẹp:
+The algebraic details can be a bit heavy, but the intuition is beautiful:
+
+85
+00:06:12,371 --> 00:06:18,468
+nếu learning problem đủ có cấu trúc, ảnh hưởng của một data point không phải phép màu.
+if the learning problem has enough structure, a data point's effect is not magic.
+
+86
+00:06:18,468 --> 00:06:23,843
+Nó là thứ có thể tính được từ nghiệm hiện tại và geometry của dữ liệu.
+It is something computable from the current solution and the geometry of the data.
+
+87
+00:06:23,843 --> 00:06:29,443
+Trong linear regression, công thức leave-one-out cho ta hai mảnh trực giác rất quan trọng:
+In linear regression, the leave-one-out formula gives two key intuitions:
+
+88
+00:06:29,443 --> 00:06:30,992
+residual và leverage.
+residual and leverage.
+
+89
+00:06:30,992 --> 00:06:34,007
+Residual là lỗi còn lại của data point đó.
+Residual is the remaining error of that data point.
+
+90
+00:06:34,007 --> 00:06:37,288
+Nếu model hiện tại dự đoán rất sai ở điểm z j,
+If the current model predicts very poorly at point z j,
+
+91
+00:06:37,288 --> 00:06:40,863
+điểm đó đang tạo áp lực kéo đường fit về phía nó.
+that point is applying pressure to pull the fit toward itself.
+
+92
+00:06:40,863 --> 00:06:43,211
+Nhưng residual lớn thôi chưa đủ.
+But a large residual alone is not enough.
+
+93
+00:06:43,211 --> 00:06:44,760
+Ta còn cần leverage.
+We also need leverage.
+
+94
+00:06:44,760 --> 00:06:49,605
+Leverage nói rằng điểm dữ liệu đó nằm ở vị trí hình học nhạy cảm đến đâu.
+Leverage says how geometrically sensitive that data point's position is.
+
+95
+00:06:49,605 --> 00:06:55,207
+Một điểm nằm trong vùng rất đông dữ liệu có thể có residual lớn, nhưng khi bỏ nó ra,
+A point inside a very dense data region may have a large residual, but when removed,
+
+96
+00:06:55,207 --> 00:06:58,475
+các điểm xung quanh vẫn giữ đường fit gần như cũ.
+nearby points still keep the fit almost the same.
+
+97
+00:06:58,475 --> 00:07:03,852
+Ngược lại, một điểm nằm ở rìa phân phối có thể kéo đường fit mạnh hơn nhiều,
+In contrast, a point on the edge of the distribution can pull the fit much more strongly,
+
+98
+00:07:03,852 --> 00:07:07,707
+vì nó đại diện cho một hướng mà dataset ít hỗ trợ.
+because it represents a direction that the dataset supports only weakly.
+
+99
+00:07:07,707 --> 00:07:11,113
+Vậy influence không chỉ là "điểm nào có loss cao".
+So influence is not just "which point has high loss".
+
+100
+00:07:11,113 --> 00:07:15,978
+Influence là sự kết hợp giữa lỗi cục bộ và hình học toàn cục của bài toán.
+Influence combines local error with the global geometry of the problem.
+
+101
+00:07:15,978 --> 00:07:18,555
+Đây là hạt giống của công thức sau này:
+This is the seed of the later formula:
+
+102
+00:07:18,555 --> 00:07:24,214
+gradient cho ta hướng mà một sample muốn kéo model đi, còn Hessian cho ta độ cong,
+the gradient gives the direction a sample wants to pull the model, while the Hessian gives
+
+103
+00:07:24,214 --> 00:07:28,026
+hay độ cứng, của loss landscape đối với hướng đó.
+the curvature, or stiffness, of the loss landscape along that direction.
+
+104
+00:07:28,026 --> 00:07:32,110
+Linear regression là trường hợp quá đẹp vì có công thức đóng.
+Linear regression is a beautiful case because it has a closed form.
+
+105
+00:07:32,110 --> 00:07:37,209
+Nhưng nhiều model tuyến tính khác, như logistic regression, không may mắn như vậy.
+But many other linear models, like logistic regression, are not so lucky.
+
+106
+00:07:37,209 --> 00:07:41,233
+Với logistic regression, model vẫn tuyến tính theo feature,
+With logistic regression, the model is still linear in the features,
+
+107
+00:07:41,233 --> 00:07:44,228
+nhưng loss không còn là một quadratic đơn giản.
+but the loss is no longer a simple quadratic.
+
+108
+00:07:44,228 --> 00:07:47,338
+Ta thường phải dùng optimization để tìm nghiệm.
+We usually need optimization to find the solution.
+
+109
+00:07:47,338 --> 00:07:51,604
+Ý tưởng tiếp theo là: nếu không có công thức đóng cho toàn bộ loss,
+The next idea is: if there is no closed form for the whole loss,
+
+110
+00:07:51,604 --> 00:07:55,137
+ta tạo một xấp xỉ quadratic quanh nghiệm hiện tại.
+we build a quadratic approximation around the current solution.
+
+111
+00:07:55,137 --> 00:07:58,345
+Hãy tưởng tượng loss landscape như một bề mặt cong.
+Imagine the loss landscape as a curved surface.
+
+112
+00:07:58,345 --> 00:08:00,983
+Gần điểm tối ưu, ta phóng to bề mặt đó.
+Near the optimum, we zoom into that surface.
+
+113
+00:08:00,983 --> 00:08:06,516
+Trong một vùng nhỏ, nó có thể được thay bằng một cái bát parabol: có độ dốc, có độ cong,
+In a small region, it can be replaced by a parabolic bowl: with slope, curvature,
+
+114
+00:08:06,516 --> 00:08:08,019
+và có đáy xấp xỉ.
+and an approximate bottom.
+
+115
+00:08:08,019 --> 00:08:11,997
+Khi bỏ một sample ra, đáy thật của loss mới có thể dịch đi.
+When removing a sample, the true bottom of the new loss may shift.
+
+116
+00:08:11,997 --> 00:08:14,783
+Ta không tìm đáy thật bằng cách train lại.
+We do not find the true bottom by retraining.
+
+117
+00:08:14,783 --> 00:08:18,937
+Ta dùng quadratic approximation để dự đoán đáy mới nằm ở đâu.
+We use the quadratic approximation to predict where the new bottom is.
+
+118
+00:08:18,937 --> 00:08:23,412
+Với các generalized linear models, ý tưởng này thường hoạt động khá tốt.
+For generalized linear models, this idea often works quite well.
+
+119
+00:08:23,412 --> 00:08:28,773
+Nó cũng cho thấy một motif sẽ lặp lại nhiều lần: thay vì chạy lại learning algorithm,
+It also reveals a recurring motif: instead of rerunning the learning algorithm,
+
+120
+00:08:28,773 --> 00:08:33,463
+ta dùng local geometry quanh model đã train để dự đoán counterfactual.
+we use local geometry around the trained model to predict the counterfactual.
+
+121
+00:08:33,463 --> 00:08:37,644
+Bây giờ ta đi từ linear model sang M-estimation tổng quát hơn.
+Now we move from linear models to more general M-estimation.
+
+122
+00:08:37,644 --> 00:08:41,327
+Ở nghiệm tối ưu, tổng gradient có trọng số bằng không.
+At the optimum, the weighted sum of gradients is zero.
+
+123
+00:08:41,327 --> 00:08:47,244
+Đây là optimality condition: nếu model đã ở đáy loss, các lực kéo từ dữ liệu cân bằng nhau.
+This is the optimality condition: at the loss bottom, data forces are balanced.
+
+124
+00:08:47,244 --> 00:08:52,876
+Ta muốn biết: nếu tăng nhẹ weight của sample j, nghiệm theta sẽ dịch theo hướng nào?
+We want to know: if sample j's weight increases slightly, where does theta move?
+
+125
+00:08:52,876 --> 00:08:57,453
+Để trả lời, ta đạo hàm optimality condition theo weight w j.
+To answer, we differentiate the optimality condition with respect to weight w j.
+
+126
+00:08:57,453 --> 00:09:03,257
+Kết quả là một công thức rất nổi tiếng trong robust statistics và sau này được dùng nhiều
+The result is a very famous formula in robust statistics and later widely used
+
+127
+00:09:03,257 --> 00:09:04,842
+trong machine learning:
+in machine learning:
+
+128
+00:09:04,842 --> 00:09:06,426
+influence function.
+the influence function.
+
+129
+00:09:06,426 --> 00:09:10,166
+Lúc này, những giả định toán học bắt đầu quan trọng.
+At this point, the mathematical assumptions start to matter.
+
+130
+00:09:10,166 --> 00:09:15,423
+Để đạo hàm này sạch, ta thường muốn loss đủ trơn, nghiệm tối ưu là duy nhất,
+To make this derivative clean, we usually want a smooth loss, a unique optimum,
+
+131
+00:09:15,423 --> 00:09:19,280
+và quanh nghiệm đó loss landscape có độ cong ổn định.
+and stable curvature of the loss landscape around that optimum.
+
+132
+00:09:19,280 --> 00:09:24,950
+Trong ngôn ngữ thường gặp của tutorial, đó là các điều kiện như strong convexity,
+In the language often used in the tutorial, these are conditions like strong convexity,
+
+133
+00:09:24,950 --> 00:09:27,824
+unique minimizer, và Hessian khả nghịch.
+a unique minimizer, and an invertible Hessian.
+
+134
+00:09:27,824 --> 00:09:33,102
+Những điều kiện này làm cho bản đồ từ data weights sang parameter trở nên ổn định:
+These conditions make the map from data weights to parameters stable:
+
+135
+00:09:33,102 --> 00:09:37,736
+thay đổi w một chút thì theta star cũng dịch một cách có thể dự đoán.
+change w a little, and theta star also moves in a predictable way.
+
+136
+00:09:37,736 --> 00:09:39,826
+Ở mức trực giác, công thức nói:
+Intuitively, the formula says:
+
+137
+00:09:39,826 --> 00:09:45,945
+Ảnh hưởng của sample j lên parameter xấp xỉ bằng âm inverse Hessian nhân với gradient của
+The effect of sample j on the parameter is approximately negative inverse Hessian times the
+
+138
+00:09:45,945 --> 00:09:47,530
+sample j.
+gradient of sample j.
+
+139
+00:09:47,530 --> 00:09:51,600
+Gradient của sample j là hướng mà sample đó kéo model.
+The gradient of sample j is the direction that sample pulls the model.
+
+140
+00:09:51,600 --> 00:09:54,190
+Hessian là độ cong của tổng loss,
+The Hessian is the curvature of the total loss,
+
+141
+00:09:54,190 --> 00:09:59,306
+cho biết loss landscape chống lại chuyển động theo từng hướng mạnh hay yếu.
+showing how strongly the loss landscape resists movement in each direction.
+
+142
+00:09:59,306 --> 00:10:02,034
+Inverse Hessian giống như bộ chuyển đổi:
+The inverse Hessian is like a converter:
+
+143
+00:10:02,034 --> 00:10:07,524
+nó biến lực kéo cục bộ của một sample thành dịch chuyển dự đoán của parameter.
+it turns a sample's local pulling force into the predicted movement of the parameter.
+
+144
+00:10:07,524 --> 00:10:12,127
+Đây là lý do influence function hấp dẫn: chỉ cần train một model,
+This is why influence functions are appealing: after training one model,
+
+145
+00:10:12,127 --> 00:10:15,093
+tính gradient và Hessian-vector products,
+computing gradients and Hessian-vector products,
+
+146
+00:10:15,093 --> 00:10:20,726
+ta có thể ước lượng ảnh hưởng của nhiều training points mà không train lại từng lần.
+we can estimate the effect of many training points without retraining each time.
+
+147
+00:10:20,726 --> 00:10:24,642
+Nhưng hãy để ý: ở đây ta mới dự đoán parameter thay đổi.
+But notice: so far, we have only predicted parameter change.
+
+148
+00:10:24,642 --> 00:10:27,331
+Đó chưa phải toàn bộ data attribution.
+That is not the whole of data attribution.
+
+149
+00:10:27,331 --> 00:10:32,972
+Đây là chỗ ta phải phân biệt thật rõ parameter prediction và behavior prediction.
+This is where we must clearly distinguish parameter prediction from behavior prediction.
+
+150
+00:10:32,972 --> 00:10:37,566
+Influence function cổ điển thường bắt đầu bằng parameter prediction:
+Classical influence functions often start with parameter prediction:
+
+151
+00:10:37,566 --> 00:10:41,389
+nếu weight của sample j thay đổi, theta sẽ dịch bao nhiêu?
+if sample j's weight changes, how far does theta move?
+
+152
+00:10:41,389 --> 00:10:46,336
+Nhưng data attribution thường không chỉ quan tâm parameter thay đổi ra sao.
+But data attribution usually does not only care how parameters change.
+
+153
+00:10:46,336 --> 00:10:50,946
+Người dùng không nhìn trực tiếp vào hàng triệu hoặc hàng tỷ parameter.
+Users do not directly look at millions or billions of parameters.
+
+154
+00:10:50,946 --> 00:10:56,283
+Họ quan tâm behavior: prediction cho một input cụ thể, loss trên một benchmark,
+They care about behavior: prediction for a specific input, loss on a benchmark,
+
+155
+00:10:56,283 --> 00:11:01,571
+accuracy trên một nhóm dữ liệu, hoặc xác suất model tạo một output nào đó.
+accuracy on a data group, or the probability that the model produces a certain output.
+
+156
+00:11:01,571 --> 00:11:04,134
+Vì vậy ta cần thêm một bước chain rule.
+So we need one more chain-rule step.
+
+157
+00:11:04,134 --> 00:11:10,038
+Nếu sample j làm parameter dịch một chút, và behavior mà ta đo cũng thay đổi theo parameter,
+If sample j moves parameters slightly, and measured behavior changes with them,
+
+158
+00:11:10,038 --> 00:11:14,390
+thì ảnh hưởng của sample j lên behavior bằng hai phần ghép lại:
+then sample j's effect on behavior is the combination of two parts:
+
+159
+00:11:14,390 --> 00:11:20,077
+sample j kéo parameter theo hướng nào, và behavior nhạy với hướng parameter đó đến đâu.
+how sample j pulls parameters, and how sensitive behavior is to that direction.
+
+160
+00:11:20,077 --> 00:11:25,608
+Trong paper của Koh và Liang, influence functions được dùng theo đúng tinh thần này:
+In Koh and Liang's paper, influence functions are used exactly in this spirit:
+
+161
+00:11:25,608 --> 00:11:30,506
+trace một prediction của black-box model ngược qua learning algorithm,
+trace a black-box model's prediction backward through the learning algorithm,
+
+162
+00:11:30,506 --> 00:11:34,326
+rồi về các training examples có trách nhiệm lớn nhất.
+back to the training examples with the greatest responsibility.
+
+163
+00:11:34,326 --> 00:11:40,287
+Đây là cây cầu giữa theory và câu hỏi thực tế: không chỉ "sample này ảnh hưởng lên theta",
+This is the bridge between theory and practice: not just "this sample affects theta",
+
+164
+00:11:40,287 --> 00:11:45,620
+mà là "sample này làm output, loss, hoặc decision của model thay đổi bao nhiêu".
+but "how much does this sample change the model's output, loss, or decision".
+
+165
+00:11:45,620 --> 00:11:51,507
+Vì vậy, khi xem một attribution method, ta nên hỏi: nó đang dự đoán parameter change,
+So when looking at an attribution method, we should ask: is it predicting parameter change,
+
+166
+00:11:51,507 --> 00:11:53,076
+hay behavior change?
+or behavior change?
+
+167
+00:11:53,076 --> 00:11:55,064
+Nếu chỉ có parameter change,
+If it only has parameter change,
+
+168
+00:11:55,064 --> 00:12:00,249
+nó có chứng minh được rằng behavior ta quan tâm cũng thay đổi đúng như vậy không?
+can it prove that the behavior we care about also changes as claimed?
+
+169
+00:12:00,249 --> 00:12:04,568
+Influence function rất đẹp, nhưng nó không phải cây đũa thần.
+Influence functions are beautiful, but they are not a magic wand.
+
+170
+00:12:04,568 --> 00:12:07,023
+Nó dựa trên một số giả định mạnh.
+They rely on several strong assumptions.
+
+171
+00:12:07,023 --> 00:12:11,735
+Thứ nhất, loss nên đủ trơn để gradient và Hessian có ý nghĩa.
+First, the loss should be smooth enough for gradients and Hessians to make sense.
+
+172
+00:12:11,735 --> 00:12:17,285
+Thứ hai, bài toán thường được phân tích trong setting convex hoặc strongly convex,
+Second, the problem is often analyzed in a convex or strongly convex setting,
+
+173
+00:12:17,285 --> 00:12:23,037
+nơi nghiệm tối ưu là duy nhất, tức là có unique minimizer, và Hessian khả nghịch.
+where the optimum is unique, meaning a unique minimizer, and the Hessian is invertible.
+
+174
+00:12:23,037 --> 00:12:27,376
+Thứ ba, model được giả định là đã train đến gần nghiệm tối ưu.
+Third, the model is assumed to have trained close to an optimum.
+
+175
+00:12:27,376 --> 00:12:29,673
+Thứ tư, perturbation phải nhỏ.
+Fourth, the perturbation must be small.
+
+176
+00:12:29,673 --> 00:12:34,105
+Upweight một điểm một chút thì Taylor approximation hợp lý hơn.
+Slightly upweighting a point fits the Taylor approximation better.
+
+177
+00:12:34,105 --> 00:12:39,246
+Bỏ hẳn một điểm ra khỏi dataset là thay đổi lớn hơn, nên xấp xỉ có thể sai.
+Fully removing a point is a larger change, so the approximation can fail.
+
+178
+00:12:39,246 --> 00:12:42,893
+Modern deep learning phá nhiều giả định trong số đó.
+Modern deep learning breaks many of those assumptions.
+
+179
+00:12:42,893 --> 00:12:44,500
+Loss không convex.
+The loss is not convex.
+
+180
+00:12:44,500 --> 00:12:46,116
+Training có randomness.
+Training has randomness.
+
+181
+00:12:46,116 --> 00:12:50,024
+Model không nhất thiết hội tụ đến một nghiệm duy nhất.
+The model does not necessarily converge to a unique solution.
+
+182
+00:12:50,024 --> 00:12:53,501
+Hessian có thể suy biến hoặc cực kỳ khó xử lý.
+The Hessian may be degenerate or extremely hard to handle.
+
+183
+00:12:53,501 --> 00:12:59,371
+Và với model lớn, chỉ cần định nghĩa "counterfactual retraining" cũng đã phức tạp:
+And with large models, simply defining "counterfactual retraining" is already complicated:
+
+184
+00:12:59,371 --> 00:13:03,911
+cùng dataset nhưng seed khác, checkpoint khác, schedule khác,
+same dataset but different seed, different checkpoint, different schedule,
+
+185
+00:13:03,911 --> 00:13:06,484
+model có thể đi đến behavior khác.
+the model may arrive at different behavior.
+
+186
+00:13:06,484 --> 00:13:12,209
+Vì vậy, influence function là một approximation có giá trị, nhưng phải được kiểm chứng.
+So influence functions are a valuable approximation, but must be validated.
+
+187
+00:13:12,209 --> 00:13:17,403
+Đặc biệt với deep neural networks, nếu thiếu convexity, thiếu convergence,
+Especially with deep neural networks, if convexity or convergence is missing,
+
+188
+00:13:17,403 --> 00:13:21,965
+hoặc Hessian không ổn định, ta không nên mặc định rằng IF reliable.
+or the Hessian is unstable, we should not assume IF is reliable.
+
+189
+00:13:21,965 --> 00:13:26,567
+Nó cho ta ngôn ngữ và baseline mạnh, không phải bằng chứng cuối cùng.
+It gives us a language and a strong baseline, not final proof.
+
+190
+00:13:26,567 --> 00:13:30,931
+Đây chính là lý do Part III phải nói về scaling và evaluation.
+This is exactly why Part III must discuss scaling and evaluation.
+
+191
+00:13:30,931 --> 00:13:34,884
+Với DNN, câu hỏi không chỉ là "công thức có đẹp không",
+With DNNs, the question is not only "is the formula elegant",
+
+192
+00:13:34,884 --> 00:13:39,149
+mà là "nó có dự đoán đúng counterfactual behavior thật không?"
+but "does it truly predict the real counterfactual behavior?"
+
+193
+00:13:39,149 --> 00:13:41,599
+Datamodels đi theo một hướng khác.
+Datamodels take a different route.
+
+194
+00:13:41,599 --> 00:13:45,757
+Thay vì bắt đầu từ local geometry của một model đã train,
+Instead of starting from local geometry of a trained model,
+
+195
+00:13:45,757 --> 00:13:50,557
+datamodeling xem toàn bộ learning process như một hàm cần học.
+datamodeling treats the whole learning process as a function to be learned.
+
+196
+00:13:50,557 --> 00:13:52,770
+Input là một subset indicator:
+The input is a subset indicator:
+
+197
+00:13:52,770 --> 00:13:58,291
+data point nào có mặt trong training subset thì vị trí tương ứng là một,
+if a data point is present in the training subset, its corresponding position is one,
+
+198
+00:13:58,291 --> 00:14:01,064
+data point nào bị loại thì là không.
+and if a data point is removed, it is zero.
+
+199
+00:14:01,064 --> 00:14:05,787
+Output là behavior đo được sau khi train model trên subset đó:
+The output is measured behavior after training the model on that subset:
+
+200
+00:14:05,787 --> 00:14:11,652
+có thể là loss trên một test example, accuracy trên một group, xác suất của một class,
+it may be loss on a test example, accuracy on a group, class probability,
+
+201
+00:14:11,652 --> 00:14:13,326
+hoặc một score cụ thể.
+or a specific score.
+
+202
+00:14:13,326 --> 00:14:16,938
+Để học datamodel, ta tạo nhiều training subsets.
+To learn a datamodel, we create many training subsets.
+
+203
+00:14:16,938 --> 00:14:22,691
+Với mỗi subset, ta chạy learning algorithm, đo behavior, rồi lưu lại một cặp:
+For each subset, we run the learning algorithm, measure behavior, and store one pair:
+
+204
+00:14:22,691 --> 00:14:24,806
+subset indicator và behavior.
+subset indicator and behavior.
+
+205
+00:14:24,806 --> 00:14:29,901
+Sau đó ta train một surrogate để dự đoán behavior từ subset indicator.
+Then we train a surrogate to predict behavior from the subset indicator.
+
+206
+00:14:29,901 --> 00:14:33,632
+Nếu surrogate này học tốt, ta có một công cụ mạnh:
+If this surrogate learns well, we have a powerful tool:
+
+207
+00:14:33,632 --> 00:14:39,369
+thay vì train lại model chính cho mọi counterfactual mới, ta hỏi datamodel.
+instead of retraining the main model for every new counterfactual, we ask the datamodel.
+
+208
+00:14:39,369 --> 00:14:45,973
+Nó không thay thế model chính; nó mô hình hóa quan hệ giữa data và behavior của model chính.
+It does not replace the main model; it models the relation between data and model behavior.
+
+209
+00:14:45,973 --> 00:14:52,135
+Nói ngắn gọn, datamodeling biến data attribution thành một bài toán supervised learning.
+In short, datamodeling turns data attribution into a supervised learning problem.
+
+210
+00:14:52,135 --> 00:14:56,282
+Phiên bản đơn giản và quan trọng nhất là linear datamodel.
+The simplest and most important version is the linear datamodel.
+
+211
+00:14:56,282 --> 00:14:57,884
+Trong linear datamodel,
+In a linear datamodel,
+
+212
+00:14:57,884 --> 00:15:03,881
+prediction của behavior bằng một bias term cộng với tổng contribution của các data point
+the behavior prediction equals a bias term plus the total contribution of data points
+
+213
+00:15:03,881 --> 00:15:05,601
+được include trong subset.
+included in the subset.
+
+214
+00:15:05,601 --> 00:15:11,677
+Nếu data point i có mặt, indicator m i bằng một, coefficient tau i được cộng vào prediction.
+If data point i is present, indicator m i is one, and coefficient tau i is added.
+
+215
+00:15:11,677 --> 00:15:17,002
+Nếu data point i vắng mặt, indicator bằng không, contribution đó biến mất.
+If data point i is absent, the indicator is zero, and that contribution disappears.
+
+216
+00:15:17,002 --> 00:15:23,063
+Vì vậy tau i có thể được đọc như attribution coefficient của data point i đối với behavior
+So tau i can be read as the attribution coefficient of data point i for the behavior
+
+217
+00:15:23,063 --> 00:15:24,665
+đang xét.
+under consideration.
+
+218
+00:15:24,665 --> 00:15:30,808
+Điểm thú vị là linear datamodel có họ hàng với cả influence functions lẫn game-theoretic
+The interesting point is that linear datamodels are related to both influence functions and
+
+219
+00:15:30,808 --> 00:15:32,410
+attribution.
+game-theoretic attribution.
+
+220
+00:15:32,410 --> 00:15:38,135
+Nó giống influence function ở chỗ mỗi data point có một effect tuyến tính, cố định.
+It resembles influence functions because each data point has a fixed linear effect.
+
+221
+00:15:38,135 --> 00:15:44,164
+Nó cũng gợi nhớ Shapley ở chỗ ta nhìn nhiều subsets và hỏi contribution của từng điểm.
+It also recalls Shapley because we examine many subsets and ask each point's contribution.
+
+222
+00:15:44,164 --> 00:15:49,638
+Nhưng mục tiêu ở đây khác: mục tiêu chính không phải thỏa mãn axioms công bằng,
+But the goal here is different: the main goal is not satisfying fairness axioms,
+
+223
+00:15:49,638 --> 00:15:52,929
+mà là predict counterfactual behavior thật tốt.
+but predicting true counterfactual behavior well.
+
+224
+00:15:52,929 --> 00:15:55,608
+Vì thế evaluation cực kỳ quan trọng.
+Therefore evaluation is extremely important.
+
+225
+00:15:55,608 --> 00:16:00,040
+Ta phải giữ lại một số subsets chưa dùng để train datamodel.
+We must hold out some subsets that were not used to train the datamodel.
+
+226
+00:16:00,040 --> 00:16:05,720
+Với các subsets đó, ta thật sự train hoặc evaluate model chính, lấy behavior thật,
+For those subsets, we actually train or evaluate the main model, get true behavior,
+
+227
+00:16:05,720 --> 00:16:09,102
+rồi so sánh với behavior datamodel dự đoán.
+and compare it with the behavior predicted by the datamodel.
+
+228
+00:16:09,102 --> 00:16:14,026
+Nếu predicted-vs-actual khớp tốt, attribution score đáng tin hơn.
+If predicted versus actual matches well, the attribution score is more trustworthy.
+
+229
+00:16:14,026 --> 00:16:19,553
+Nếu correlation thấp, hoặc datamodel dự đoán sai direction của counterfactual,
+If correlation is low, or the datamodel predicts the wrong counterfactual direction,
+
+230
+00:16:19,553 --> 00:16:22,103
+thì score nhìn đẹp cũng chưa đủ.
+then a nice-looking score is still not enough.
+
+231
+00:16:22,103 --> 00:16:24,030
+Trong predictive attribution,
+In predictive attribution,
+
+232
+00:16:24,030 --> 00:16:30,242
+một score chỉ có nghĩa khi nó giúp dự đoán điều sẽ xảy ra trong những counterfactual chưa
+a score is meaningful only when it helps predict what will happen in counterfactuals not yet
+
+233
+00:16:30,242 --> 00:16:31,844
+thấy.
+seen.
+
+234
+00:16:31,844 --> 00:16:34,581
+Ta có thể tóm tắt Part II bằng năm ý.
+We can summarize Part II in five points.
+
+235
+00:16:34,581 --> 00:16:39,725
+Một: predictive attribution có gốc gần với một statistical analog lâu đời:
+One: predictive attribution is rooted in an old statistical analog:
+
+236
+00:16:39,725 --> 00:16:45,104
+dự đoán estimator thay đổi thế nào khi dữ liệu hoặc trọng số dữ liệu thay đổi.
+predicting how an estimator changes when data or data weights change.
+
+237
+00:16:45,104 --> 00:16:49,120
+Hai: M-estimation cho ta một ngôn ngữ để nói về data.
+Two: M-estimation gives us a language for talking about data.
+
+238
+00:16:49,120 --> 00:16:55,186
+Data không chỉ có mặt hoặc vắng mặt; nó đi vào learning algorithm qua weight vector.
+Data is not just present or absent; it enters the learning algorithm through weights.
+
+239
+00:16:55,186 --> 00:16:58,791
+Ba: leave-one-out là counterfactual cơ bản nhất.
+Three: leave-one-out is the most basic counterfactual.
+
+240
+00:16:58,791 --> 00:17:03,869
+Nó rõ ràng, dễ hiểu, nhưng quá đắt nếu tính chính xác ở scale lớn.
+It is clear and intuitive, but too expensive to compute exactly at large scale.
+
+241
+00:17:03,869 --> 00:17:05,540
+Bốn:
+Four:
+
+242
+00:17:05,540 --> 00:17:12,058
+influence functions dùng gradient và Hessian để xấp xỉ điều gì sẽ xảy ra khi weight của một
+influence functions use gradients and Hessians to approximate changes when the weight of a
+
+243
+00:17:12,058 --> 00:17:13,729
+sample thay đổi.
+sample changes.
+
+244
+00:17:13,729 --> 00:17:17,951
+Đây là cầu nối từ robust statistics sang machine learning,
+This is a bridge from robust statistics to machine learning,
+
+245
+00:17:17,951 --> 00:17:24,098
+nhưng đi kèm các giả định mạnh như strong convexity, unique minimizer, convergence,
+but it comes with strong assumptions like strong convexity, unique minimizer, convergence,
+
+246
+00:17:24,098 --> 00:17:25,769
+và Hessian ổn định.
+and a stable Hessian.
+
+247
+00:17:25,769 --> 00:17:30,910
+Năm: datamodels học trực tiếp map từ subset data sang model behavior.
+Five: datamodels directly learn the map from data subsets to model behavior.
+
+248
+00:17:30,910 --> 00:17:32,580
+Nếu học tốt,
+If they learn well,
+
+249
+00:17:32,580 --> 00:17:39,078
+chúng biến attribution thành một bài toán prediction có thể đánh giá bằng counterfactuals.
+they turn attribution into a prediction problem that can be evaluated with counterfactuals.
+
+250
+00:17:39,078 --> 00:17:44,209
+Điểm chung của tất cả là: attribution không nên chỉ là một ranking đẹp.
+The common point is: attribution should not be only a beautiful ranking.
+
+251
+00:17:44,209 --> 00:17:50,199
+Nó phải trả lời được câu hỏi "nếu data thay đổi, behavior có đổi như dự đoán không?"
+It must answer the question: "if data changes, does behavior change as predicted?"
+
+252
+00:17:50,199 --> 00:17:52,459
+Và đó là nơi Part III bắt đầu.
+And that is where Part III begins.
+
+253
+00:17:52,459 --> 00:17:55,968
+Khi model nhỏ và convex, theory khá sạch.
+When the model is small and convex, the theory is fairly clean.
+
+254
+00:17:55,968 --> 00:17:59,805
+Nhưng modern ML không nhỏ, không convex, và không rẻ.
+But modern ML is not small, not convex, and not cheap.
+
+255
+00:17:59,805 --> 00:18:06,294
+Vậy làm sao scale những ý tưởng này lên deep networks, large datasets, và foundation models?
+So how do we scale these ideas to deep networks, large datasets, and foundation models?
+
+256
+00:18:06,294 --> 00:18:09,751
+Phần tiếp theo sẽ nói về scaling và evaluation:
+The next part will discuss scaling and evaluation:
+
+257
+00:18:09,751 --> 00:18:14,374
+cách các estimator hiện đại cố gắng giữ lại tinh thần của theory,
+how modern estimators try to preserve the spirit of the theory,
+
+258
+00:18:14,374 --> 00:18:18,972
+nhưng sống được trong thế giới messy của modern machine learning.
+while surviving in the messy world of modern machine learning.

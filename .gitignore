@@ -13,11 +13,13 @@ venv/
 media/
 outputs/videos/*
 outputs/frames/*
+outputs/render_logs/
 
 # Large/generated assets
 *.mp4
 *.mov
 *.mkv
+*.avi
 *.wav
 *.mp3
 *.flac

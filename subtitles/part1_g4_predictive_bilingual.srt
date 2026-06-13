@@ -1,0 +1,388 @@
+1
+00:00:00,000 --> 00:00:08,075
+Ở phần game-theoretic attribution, ta hỏi: nếu nhiều data point cùng tạo ra một utility,
+thì credit nên được chia thế nào?
+In game-theoretic attribution, we asked: if many data points together create one
+utility, how should credit be divided?
+
+2
+00:00:08,075 --> 00:00:10,500
+Bây giờ ta đổi lens thêm một lần nữa.
+Now we switch lenses one more time.
+
+3
+00:00:10,500 --> 00:00:15,506
+Predictive Attribution không bắt đầu từ câu hỏi ai xứng đáng nhận credit.
+Predictive Attribution does not begin with the question of who deserves credit.
+
+4
+00:00:15,506 --> 00:00:18,197
+Nó bắt đầu từ một câu hỏi thực dụng hơn:
+It begins with a more practical question:
+
+5
+00:00:18,197 --> 00:00:22,535
+Nếu training data thay đổi, model behavior sẽ thay đổi như thế nào?
+If the training data changes, how will model behavior change?
+
+6
+00:00:22,535 --> 00:00:30,299
+Ví dụ, nếu bỏ một nhóm data ra khỏi training set, accuracy sẽ giảm mạnh, tăng nhẹ, hay
+gần như không đổi?
+For example, if we remove a group of data from the training set, will accuracy drop
+sharply, increase slightly, or remain almost unchanged?
+
+7
+00:00:30,299 --> 00:00:36,283
+Nếu thêm một loại dữ liệu mới vào, model có bớt hallucinate không, có công bằng hơn
+không?
+If we add a new type of data, will the model hallucinate less, and will it become
+fairer?
+
+8
+00:00:36,283 --> 00:00:40,933
+Nói ngắn gọn, predictive attribution xem dữ liệu như một nút điều khiển.
+In short, predictive attribution treats data like a control knob.
+
+9
+00:00:40,933 --> 00:00:47,673
+Khi nút đó bật, tắt, hoặc đổi trọng số, ta muốn dự đoán behavior của model sẽ dịch
+chuyển ra sao.
+When that knob is turned on, turned off, or reweighted, we want to predict how the model
+behavior will shift.
+
+10
+00:00:47,673 --> 00:00:49,697
+Từ khóa ở đây là counterfactual.
+The key word here is counterfactual.
+
+11
+00:00:49,697 --> 00:00:54,957
+Ta không chỉ nhìn model hiện tại rồi giải thích nó bằng một score nghe có vẻ hợp lý.
+We do not only look at the current model and explain it with a score that sounds
+reasonable.
+
+12
+00:00:54,957 --> 00:01:00,886
+Ta hỏi về một thế giới khác: nếu training data không giống như ban đầu, thì điều gì sẽ
+xảy ra?
+We ask about another possible world: if the training data were not the same as before,
+what would happen?
+
+13
+00:01:00,886 --> 00:01:03,941
+Trong lý tưởng, ta có thể train lại model nhiều lần.
+Ideally, we could retrain the model many times.
+
+14
+00:01:03,941 --> 00:01:05,499
+Một lần giữ nguyên data.
+Once with the data unchanged.
+
+15
+00:01:05,499 --> 00:01:06,996
+Một lần bỏ data point i.
+Once without data point i.
+
+16
+00:01:06,996 --> 00:01:08,615
+Một lần bỏ cả một subset.
+Once without an entire subset.
+
+17
+00:01:08,615 --> 00:01:11,103
+Một lần tăng trọng số cho một nhóm dữ liệu.
+Once with a group of data upweighted.
+
+18
+00:01:11,103 --> 00:01:14,017
+Sau đó ta so sánh behavior giữa các lần train.
+Then we compare behavior across those training runs.
+
+19
+00:01:14,017 --> 00:01:17,436
+Nhưng với modern machine learning, cách này quá đắt.
+But with modern machine learning, this approach is too expensive.
+
+20
+00:01:17,436 --> 00:01:22,009
+Train lại model lớn chỉ để trả lời một câu hỏi nhỏ gần như không khả thi.
+Retraining a large model just to answer one small question is almost infeasible.
+
+21
+00:01:22,009 --> 00:01:31,559
+Vì vậy predictive attribution cần một ý tưởng khác: học một mô hình phụ có thể dự đoán
+counterfactual behavior mà không cần train lại model chính mỗi lần.
+Therefore predictive attribution needs another idea: learn an auxiliary model that can
+predict counterfactual behavior without retraining the main model every time.
+
+22
+00:01:31,559 --> 00:01:35,787
+Cách trực quan nhất là tạo ra nhiều training subsets.
+The most intuitive approach is to create many training subsets.
+
+23
+00:01:35,787 --> 00:01:46,068
+Với mỗi subset, ta train hoặc fine-tune model, rồi đo behavior của nó trên validation
+set, benchmark, hoặc một nhóm prompt quan trọng.
+For each subset, we train or fine-tune the model, then measure its behavior on a
+validation set, a benchmark, or an important group of prompts.
+
+24
+00:01:46,068 --> 00:01:52,047
+Mỗi subset được biểu diễn bằng một subset indicator: một vector gồm không và một.
+Each subset is represented by a subset indicator: a vector of zeros and ones.
+
+25
+00:01:52,047 --> 00:01:56,500
+Data point nào được giữ lại thì vị trí tương ứng là một.
+A data point that is kept has a one in the corresponding position.
+
+26
+00:01:56,500 --> 00:02:00,277
+Data point nào bị bỏ ra thì vị trí đó là không.
+A data point that is removed has a zero in that position.
+
+27
+00:02:00,277 --> 00:02:08,232
+Khi đó, mỗi thí nghiệm tạo ra một cặp dữ liệu mới: subset indicator ở đầu vào, và model
+behavior ở đầu ra.
+Then each experiment creates a new data pair: the subset indicator as input, and model
+behavior as output.
+
+28
+00:02:08,232 --> 00:02:11,860
+Ví dụ, vector này có thể dẫn đến accuracy 0.82.
+For example, this vector may lead to accuracy 0.82.
+
+29
+00:02:11,860 --> 00:02:14,937
+Vector khác có thể dẫn đến accuracy 0.76.
+Another vector may lead to accuracy 0.76.
+
+30
+00:02:14,937 --> 00:02:21,115
+Một vector khác nữa có thể làm loss giảm, nhưng performance trên edge cases lại tệ hơn.
+A third vector may reduce loss, but make performance on edge cases worse.
+
+31
+00:02:21,115 --> 00:02:28,245
+Ta đang học một bản đồ: cấu trúc của training subset liên hệ thế nào với behavior của
+model.
+We are learning a map: how the structure of the training subset relates to the behavior
+of the model.
+
+32
+00:02:28,245 --> 00:02:31,024
+Bản đồ đó thường được gọi là một datamodel.
+That map is often called a datamodel.
+
+33
+00:02:31,024 --> 00:02:34,142
+Datamodel không phải model chính mà ta deploy.
+The datamodel is not the main model we deploy.
+
+34
+00:02:34,142 --> 00:02:41,509
+Nó là một surrogate: một mô hình phụ học quan hệ giữa dữ liệu huấn luyện và behavior của
+model chính.
+It is a surrogate: an auxiliary model that learns the relationship between training data
+and the behavior of the main model.
+
+35
+00:02:41,509 --> 00:02:44,559
+Đầu vào của datamodel là subset indicator.
+The input to the datamodel is the subset indicator.
+
+36
+00:02:44,559 --> 00:02:50,434
+Đầu ra là behavior mà ta dự đoán model chính sẽ có nếu được train trên subset đó.
+The output is the behavior we predict the main model would have if it were trained on
+that subset.
+
+37
+00:02:50,434 --> 00:02:55,631
+Nếu datamodel học tốt, ta có thể đặt câu hỏi counterfactual nhanh hơn nhiều.
+If the datamodel learns well, we can ask counterfactual questions much faster.
+
+38
+00:02:55,631 --> 00:03:06,568
+Thay vì thật sự train lại model chính khi bỏ data point i, ta đưa một vector mới vào
+datamodel: giống vector ban đầu, nhưng vị trí của i được tắt đi.
+Instead of actually retraining the main model when removing data point i, we feed a new
+vector into the datamodel: the same as the original vector, but with the position of i
+turned off.
+
+39
+00:03:06,568 --> 00:03:08,873
+Datamodel dự đoán behavior mới.
+The datamodel predicts the new behavior.
+
+40
+00:03:08,873 --> 00:03:14,702
+Sự khác biệt giữa behavior trước và sau khi tắt i cho ta một tín hiệu attribution.
+The difference between behavior before and after turning off i gives us an attribution
+signal.
+
+41
+00:03:14,702 --> 00:03:19,493
+Đây là lý do predictive attribution không chỉ là “gán điểm cho data”.
+This is why predictive attribution is not just "assigning scores to data."
+
+42
+00:03:19,493 --> 00:03:25,322
+Nó là một bài toán prediction: dự đoán model sẽ phản ứng thế nào khi dữ liệu thay đổi.
+It is a prediction problem: predicting how the model will react when the data changes.
+
+43
+00:03:25,322 --> 00:03:30,163
+Khi đã có datamodel, attribution có thể được hiểu như sensitivity.
+Once we have a datamodel, attribution can be understood as sensitivity.
+
+44
+00:03:30,163 --> 00:03:39,224
+Nếu thay đổi một data point làm prediction của datamodel đổi nhiều, data point đó có ảnh
+hưởng lớn đến behavior đang xét.
+If changing one data point changes the datamodel's prediction a lot, that data point has
+a large influence on the behavior being measured.
+
+45
+00:03:39,224 --> 00:03:45,638
+Nếu bật hoặc tắt data point đó gần như không làm prediction đổi, attribution của nó nhỏ.
+If turning that data point on or off barely changes the prediction, its attribution is
+small.
+
+46
+00:03:45,638 --> 00:03:53,888
+Với một datamodel đơn giản, ví dụ mô hình tuyến tính, sensitivity có thể nhìn giống
+coefficient của từng data point.
+With a simple datamodel, for example a linear model, sensitivity can look like the
+coefficient of each data point.
+
+47
+00:03:53,888 --> 00:03:58,967
+Nhưng ý nghĩa của score luôn phụ thuộc vào behavior mà ta chọn đo.
+But the meaning of the score always depends on the behavior we choose to measure.
+
+48
+00:03:58,967 --> 00:04:05,667
+Một data point có thể giúp accuracy tổng thể, nhưng làm tệ hơn trên một nhóm dữ liệu
+nhạy cảm.
+One data point may improve overall accuracy, but make performance worse on a sensitive
+group.
+
+49
+00:04:05,667 --> 00:04:12,010
+Một data point khác có thể không tăng accuracy nhiều, nhưng lại quan trọng cho
+robustness.
+Another data point may not improve accuracy much, but may be important for robustness.
+
+50
+00:04:12,010 --> 00:04:19,187
+Vì vậy trong predictive attribution, câu hỏi đầu tiên luôn là: ta đang muốn dự đoán
+behavior nào?
+Therefore in predictive attribution, the first question is always: which behavior are we
+trying to predict?
+
+51
+00:04:19,187 --> 00:04:23,504
+Điểm mạnh của predictive attribution là nó có thể amortize cost.
+The strength of predictive attribution is that it can amortize cost.
+
+52
+00:04:23,504 --> 00:04:29,979
+Ta trả một chi phí lớn ban đầu để tạo nhiều training subsets, đo behavior, rồi học
+datamodel.
+We pay a large upfront cost to create many training subsets, measure behavior, and then
+learn the datamodel.
+
+53
+00:04:29,979 --> 00:04:36,300
+Sau đó, khi có nhiều câu hỏi mới, ta không nhất thiết phải train lại model chính từ đầu.
+After that, when we have many new questions, we do not necessarily have to retrain the
+main model from scratch.
+
+54
+00:04:36,300 --> 00:04:38,877
+Ta dùng datamodel để dự đoán nhanh hơn.
+We use the datamodel to predict faster.
+
+55
+00:04:38,877 --> 00:04:45,880
+Đổi lại, predictive attribution có một yêu cầu rất rõ: phải kiểm tra khả năng dự đoán
+counterfactual.
+In return, predictive attribution has a very clear requirement: we must test its ability
+to predict counterfactuals.
+
+56
+00:04:45,880 --> 00:04:57,884
+Nếu datamodel nói rằng bỏ một subset sẽ làm accuracy giảm 5 phần trăm, nhưng khi thật sự
+retrain thì accuracy gần như không đổi, attribution từ datamodel đó chưa đáng tin.
+If the datamodel says that removing a subset will reduce accuracy by five percent, but
+actual retraining shows that accuracy is almost unchanged, then attribution from that
+datamodel is not reliable yet.
+
+57
+00:04:57,884 --> 00:05:02,134
+Nói cách khác, với lens predictive, một score đẹp chưa đủ.
+In other words, with the predictive lens, a nice-looking score is not enough.
+
+58
+00:05:02,134 --> 00:05:06,760
+Score phải giúp dự đoán đúng behavior trong những tình huống chưa thấy.
+The score must help predict behavior correctly in unseen situations.
+
+59
+00:05:06,760 --> 00:05:12,816
+Đây là điểm sẽ nối trực tiếp sang các phần sau: theory, datamodels, scaling, và
+evaluation.
+This point connects directly to the later parts: theory, datamodels, scaling, and
+evaluation.
+
+60
+00:05:12,816 --> 00:05:16,514
+Đến đây, ta có ba lens chính cho data attribution.
+At this point, we have three main lenses for data attribution.
+
+61
+00:05:16,514 --> 00:05:21,284
+Corroborative attribution hỏi: output này được hỗ trợ bởi evidence nào?
+Corroborative attribution asks: what evidence supports this output?
+
+62
+00:05:21,284 --> 00:05:27,537
+Game-theoretic attribution hỏi: utility chung nên được chia credit cho data point như
+thế nào?
+Game-theoretic attribution asks: how should shared utility be credited to data points?
+
+63
+00:05:27,537 --> 00:05:33,699
+Predictive attribution hỏi: nếu training data thay đổi, model behavior sẽ thay đổi ra
+sao?
+Predictive attribution asks: if the training data changes, how will model behavior
+change?
+
+64
+00:05:33,699 --> 00:05:36,392
+Ba lens này không cạnh tranh nhau.
+These three lenses do not compete with each other.
+
+65
+00:05:36,392 --> 00:05:42,600
+Chúng trả lời ba loại câu hỏi khác nhau: evidence, credit, và counterfactual prediction.
+They answer three different kinds of questions: evidence, credit, and counterfactual
+prediction.
+
+66
+00:05:42,600 --> 00:05:50,132
+Phần tiếp theo sẽ đi sâu hơn vào nền tảng: M-estimation, leave-one-out, influence
+functions, và datamodels.
+The next part will go deeper into the foundations: M-estimation, leave-one-out,
+influence functions, and datamodels.
+
+67
+00:05:50,132 --> 00:05:56,362
+Đó là nơi ta bắt đầu biến những trực giác này thành công cụ có thể tính toán ở scale
+lớn.
+That is where we start turning these intuitions into tools that can be computed at large
+scale.

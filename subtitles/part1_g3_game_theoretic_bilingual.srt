@@ -1,0 +1,287 @@
+1
+00:00:00,000 --> 00:00:05,013
+Sau corroborative attribution, ta chuyển sang một kiểu câu hỏi khác.
+After corroborative attribution, we move to a different kind of question.
+
+2
+00:00:05,013 --> 00:00:09,594
+Ở phần trước, ta hỏi: output này được hỗ trợ bởi evidence nào?
+In the previous part, we asked: what evidence supports this output?
+
+3
+00:00:09,594 --> 00:00:15,350
+Nói cách khác, ta đi từ output về những nguồn có thể làm output đáng tin hơn.
+In other words, we trace the output back to sources that can make it more trustworthy.
+
+4
+00:00:15,350 --> 00:00:19,811
+Nhưng có nhiều tình huống mà câu hỏi evidence là chưa đủ.
+But there are many situations where the evidence question is not enough.
+
+5
+00:00:19,811 --> 00:00:35,880
+Nếu một dataset giúp model tăng accuracy, nếu một nhóm dữ liệu làm loss giảm xuống, hoặc
+nếu dữ liệu huấn luyện tạo ra giá trị kinh doanh, ta muốn hỏi một câu khác: phần credit
+đó nên được chia cho các data point như thế nào?
+If a dataset helps the model improve accuracy, if a group of data lowers the loss, or if
+training data creates business value, we want to ask a different question: how should
+that credit be divided among the data points?
+
+6
+00:00:35,880 --> 00:00:50,390
+Đây là trực giác của game-theoretic attribution: xem dữ liệu như những thành phần cùng
+đóng góp vào một kết quả chung, rồi tìm một cách phân bổ credit có nguyên tắc hơn là chỉ
+nhìn bằng cảm giác.
+This is the intuition behind game-theoretic attribution: treating data as components
+that jointly contribute to a shared result, then finding a principled way to allocate
+credit instead of relying only on intuition.
+
+7
+00:00:50,390 --> 00:00:57,798
+Trong game-theoretic attribution, mỗi data point được xem như một player trong một
+cooperative game.
+In game-theoretic attribution, each data point is treated as a player in a cooperative
+game.
+
+8
+00:00:57,798 --> 00:01:03,329
+Một nhóm player hợp tác với nhau tạo thành một coalition, ký hiệu là S.
+A group of players cooperating with each other forms a coalition, denoted S.
+
+9
+00:01:03,329 --> 00:01:09,646
+Sau đó ta gán cho coalition này một giá trị, gọi là utility, thường viết là v của S.
+Then we assign this coalition a value, called utility, usually written as v of S.
+
+10
+00:01:09,646 --> 00:01:22,559
+Utility có thể là accuracy trên validation set, có thể là negative loss, có thể là doanh
+thu, hoặc bất kỳ đại lượng nào nói rằng model đang tốt lên theo tiêu chí của ứng dụng.
+Utility can be accuracy on a validation set, negative loss, revenue, or any quantity
+that says the model is improving according to the application's criterion.
+
+11
+00:01:22,559 --> 00:01:28,774
+Điểm quan trọng là: game không hỏi data point trông giống output đến mức nào.
+The important point is: the game does not ask how similar a data point looks to the
+output.
+
+12
+00:01:28,774 --> 00:01:33,518
+Game hỏi data point đó đóng góp bao nhiêu vào utility chung.
+It asks how much that data point contributes to the shared utility.
+
+13
+00:01:33,518 --> 00:01:37,377
+Credit của một data point không nên được đo riêng lẻ.
+The credit of a data point should not be measured in isolation.
+
+14
+00:01:37,377 --> 00:01:45,939
+Ta đo nó bằng marginal contribution: nếu đã có một coalition S, rồi ta thêm data point i
+vào, utility tăng thêm bao nhiêu?
+We measure it using marginal contribution: if we already have a coalition S, then add
+data point i, how much does utility increase?
+
+15
+00:01:45,939 --> 00:01:51,670
+Nói bằng công thức, delta của i trong context S bằng v của S hợp với i, trừ đi v của S.
+In formula form, delta of i in context S equals v of S union i, minus v of S.
+
+16
+00:01:51,670 --> 00:01:56,168
+Nếu utility tăng nhiều, i có contribution lớn trong context đó.
+If utility increases a lot, i has a large contribution in that context.
+
+17
+00:01:56,168 --> 00:02:00,986
+Nếu utility gần như không đổi, contribution của i trong context đó nhỏ.
+If utility barely changes, i's contribution in that context is small.
+
+18
+00:02:00,986 --> 00:02:03,063
+Cách nghĩ này rất tự nhiên.
+This way of thinking is very natural.
+
+19
+00:02:03,063 --> 00:02:08,863
+Một ví dụ huấn luyện chỉ có giá trị khi ta biết nó đang được thêm vào tập dữ liệu nào.
+A training example only has value when we know which dataset it is being added to.
+
+20
+00:02:08,863 --> 00:02:18,658
+Một điểm dữ liệu hiếm có thể rất quan trọng trong một dataset thiếu ví dụ tương tự,
+nhưng ít quan trọng hơn trong một dataset đã rất dư thừa.
+A rare data point can be very important in a dataset that lacks similar examples, but
+less important in a dataset that is already highly redundant.
+
+21
+00:02:18,658 --> 00:02:21,126
+Đây là điểm dễ gây nhầm nhất.
+This is the point that is easiest to confuse.
+
+22
+00:02:21,126 --> 00:02:28,362
+Cùng một data point có thể rất quan trọng trong context này, nhưng gần như dư thừa trong
+context khác.
+The same data point can be very important in one context, but almost redundant in
+another context.
+
+23
+00:02:28,362 --> 00:02:35,910
+Nếu coalition hiện tại còn thiếu loại ví dụ mà i cung cấp, thêm i vào có thể làm utility
+tăng mạnh.
+If the current coalition still lacks the kind of example that i provides, adding i can
+make utility increase sharply.
+
+24
+00:02:35,910 --> 00:02:45,182
+Nhưng nếu coalition đã có nhiều ví dụ rất giống i, thì thêm i vào chỉ làm utility tăng
+một chút, hoặc thậm chí không tăng.
+But if the coalition already has many examples very similar to i, then adding i only
+increases utility a little, or may not increase it at all.
+
+25
+00:02:45,182 --> 00:02:49,831
+Vì vậy, credit không phải là một nhãn cố định dán lên data point.
+Therefore, credit is not a fixed label attached to a data point.
+
+26
+00:02:49,831 --> 00:02:52,993
+Credit phụ thuộc vào coalition xung quanh nó.
+Credit depends on the coalition around it.
+
+27
+00:02:52,993 --> 00:03:00,637
+Nói ngắn gọn: muốn nói một data point có giá trị bao nhiêu, ta phải nói giá trị đó được
+đo trong bối cảnh nào.
+In short: to say how valuable a data point is, we must say in which context that value
+is measured.
+
+28
+00:03:00,637 --> 00:03:04,113
+Vậy ta nên chọn context nào để đo contribution?
+So which context should we choose to measure contribution?
+
+29
+00:03:04,113 --> 00:03:09,556
+Shapley value trả lời bằng một ý tưởng rất đẹp: đừng chọn một context duy nhất.
+The Shapley value answers with a beautiful idea: do not choose a single context.
+
+30
+00:03:09,556 --> 00:03:14,107
+Ta tưởng tượng data point được thêm vào theo nhiều thứ tự khác nhau.
+We imagine the data point being added in many different orders.
+
+31
+00:03:14,107 --> 00:03:20,626
+Ở mỗi thứ tự, khi đến lượt i xuất hiện, ta đo marginal contribution của i tại thời điểm
+đó.
+In each order, when it is i's turn to appear, we measure the marginal contribution of i
+at that moment.
+
+32
+00:03:20,626 --> 00:03:26,366
+Nếu i xuất hiện sớm, nó có thể đóng góp rất nhiều vì coalition trước nó còn nhỏ.
+If i appears early, it may contribute a lot because the coalition before it is still
+small.
+
+33
+00:03:26,366 --> 00:03:33,685
+Nếu i xuất hiện muộn, contribution có thể thấp hơn vì nhiều data khác đã giải quyết phần
+việc tương tự.
+If i appears late, the contribution may be lower because other data has already solved a
+similar part of the work.
+
+34
+00:03:33,685 --> 00:03:37,870
+Sau đó, ta lấy trung bình các contribution này qua nhiều thứ tự.
+Then we average these contributions across many orders.
+
+35
+00:03:37,870 --> 00:03:50,723
+Kết quả là một credit score có tính đối xứng hơn: nếu hai data point đóng vai trò giống
+nhau, chúng nhận credit giống nhau; nếu một điểm không bao giờ giúp utility, credit của
+nó gần bằng không.
+The result is a more symmetric credit score: if two data points play the same role, they
+receive the same credit; if a point never helps utility, its credit is close to zero.
+
+36
+00:03:50,723 --> 00:03:56,669
+Đó là lý do Shapley value thường được xem như một chuẩn lý tưởng cho việc chia credit.
+That is why the Shapley value is often considered an ideal standard for dividing credit.
+
+37
+00:03:56,669 --> 00:03:58,263
+Vấn đề là scale.
+The problem is scale.
+
+38
+00:03:58,263 --> 00:04:08,023
+Để tính Shapley value chính xác, về mặt lý tưởng ta phải xét rất nhiều coalition, gần
+như mọi cách data point có thể xuất hiện trước hoặc sau nhau.
+To compute the Shapley value exactly, ideally we have to consider many coalitions,
+almost every way a data point can appear before or after others.
+
+39
+00:04:08,023 --> 00:04:11,719
+Với n data point, số coalition tăng theo hai mũ n.
+With n data points, the number of coalitions grows as two to the n.
+
+40
+00:04:11,719 --> 00:04:15,106
+Khi n bằng bốn, ta còn có thể nhìn được toàn bộ.
+When n equals four, we can still inspect the whole thing.
+
+41
+00:04:15,106 --> 00:04:18,625
+Nhưng khi n là một triệu, brute force là bất khả thi.
+But when n is one million, brute force is impossible.
+
+42
+00:04:18,625 --> 00:04:29,270
+Vì vậy trong thực tế, game-theoretic attribution thường cần sampling, approximation,
+hoặc các estimator đặc biệt để ước lượng credit mà không thử mọi coalition.
+Therefore in practice, game-theoretic attribution usually needs sampling, approximation,
+or special estimators to estimate credit without trying every coalition.
+
+43
+00:04:29,270 --> 00:04:34,963
+Tóm lại, game-theoretic attribution trả lời câu hỏi: credit nên được phân bổ như thế
+nào?
+In short, game-theoretic attribution answers the question: how should credit be
+allocated?
+
+44
+00:04:34,963 --> 00:04:37,683
+Công cụ trung tâm là marginal contribution.
+The central tool is marginal contribution.
+
+45
+00:04:37,683 --> 00:04:40,317
+Chuẩn lý tưởng thường là Shapley value.
+The ideal standard is often the Shapley value.
+
+46
+00:04:40,317 --> 00:04:44,183
+Nhưng khi đi lên scale lớn, ta phải chấp nhận approximation.
+But when we move to large scale, we must accept approximation.
+
+47
+00:04:44,183 --> 00:04:47,200
+Lens này khác với corroborative attribution.
+This lens is different from corroborative attribution.
+
+48
+00:04:47,200 --> 00:04:52,893
+Nó không hỏi nguồn nào hỗ trợ output, mà hỏi dữ liệu đóng góp bao nhiêu vào utility.
+It does not ask which source supports the output, but asks how much the data contributes
+to utility.
+
+49
+00:04:52,893 --> 00:05:03,961
+Tiếp theo, ta chuyển sang lens thứ ba: Predictive Attribution, nơi câu hỏi không còn là
+chia credit, mà là dự đoán model sẽ thay đổi thế nào nếu training data thay đổi.
+Next, we move to the third lens: Predictive Attribution, where the question is no longer
+how to divide credit, but how to predict how the model will change if the training data
+changes.

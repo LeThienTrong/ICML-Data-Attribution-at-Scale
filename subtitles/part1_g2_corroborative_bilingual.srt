@@ -1,0 +1,170 @@
+1
+00:00:00,000 --> 00:00:04,400
+Trong phần này, ta đi vào Corroborative Attribution.
+In this section, we move into Corroborative Attribution.
+
+2
+00:00:04,400 --> 00:00:08,800
+Ở đây, câu hỏi không phải là: data nào đã gây ra output.
+Here, the question is not: which data caused the output.
+
+3
+00:00:08,800 --> 00:00:14,340
+Câu hỏi trước tiên là: có bằng chứng nào trong dữ liệu làm output này đáng tin hơn không?
+The first question is: what evidence in the data makes this output more trustworthy?
+
+4
+00:00:14,340 --> 00:00:19,600
+Hãy tưởng tượng model vừa sinh ra một claim, hoặc một đoạn generation.
+Imagine the model has just produced a claim, or a generated passage.
+
+5
+00:00:19,600 --> 00:00:25,000
+Ta quét qua một corpus cho trước: doc A, doc B, doc C, và nhiều đoạn khác.
+We scan a given corpus: doc A, doc B, doc C, and many other chunks.
+
+6
+00:00:25,000 --> 00:00:29,100
+Một vài đoạn chỉ là nhiễu.
+Some chunks are only noise.
+
+7
+00:00:29,100 --> 00:00:32,500
+Nhưng một vài đoạn lại có nội dung rất gần với output.
+But some chunks are very close to the output.
+
+8
+00:00:32,500 --> 00:00:37,750
+Những đoạn đó được kéo ra như các evidence candidates:
+ứng viên bằng chứng cho output hiện tại.
+Those chunks are pulled out as evidence candidates for the current output.
+
+9
+00:00:37,750 --> 00:00:42,100
+Góc nhìn này xuất hiện trong nhiều use case thực tế.
+This lens appears in many real-world use cases.
+
+10
+00:00:42,100 --> 00:00:47,400
+Với citation, ta muốn biết câu trả lời của LLM được hỗ trợ bởi nguồn nào.
+For citation, we want to know which sources support the LLM answer.
+
+11
+00:00:47,400 --> 00:00:53,200
+Với copyright detection, ta muốn biết output
+có quá giống một đoạn trong dữ liệu gốc hay không.
+For copyright detection, we ask whether the output is too similar to original data.
+
+12
+00:00:53,200 --> 00:00:59,920
+Dù mục tiêu khác nhau, cấu trúc chung vẫn là:
+từ output, tìm dữ liệu liên quan nhất.
+Even with different goals, the structure is the same:
+from output, find the most related data.
+
+13
+00:00:59,920 --> 00:01:03,900
+Ta có thể viết ý tưởng đó bằng một score.
+We can write this idea as a score.
+
+14
+00:01:03,900 --> 00:01:08,100
+Với một input x, model sinh ra output y.
+Given an input x, the model produces output y.
+
+15
+00:01:08,100 --> 00:01:13,500
+Với một item z trong corpus, ta tính một similarity score.
+For an item z in the corpus, we compute a similarity score.
+
+16
+00:01:13,500 --> 00:01:17,000
+Nếu score cao, z corroborate tốt cho output.
+If the score is high, z corroborates the output well.
+
+17
+00:01:17,000 --> 00:01:20,100
+Nói cách khác, z là bằng chứng mạnh hơn.
+In other words, z is stronger evidence.
+
+18
+00:01:20,100 --> 00:01:23,800
+Điểm quan trọng là: relation ở đây là sự tương đồng hoặc hỗ trợ,
+không phải quan hệ nhân quả.
+The key point is: this relation is similarity or support, not causality.
+
+19
+00:01:23,800 --> 00:01:27,300
+Pipeline đầy đủ có ba bước.
+The full pipeline has three steps.
+
+20
+00:01:27,300 --> 00:01:32,100
+Đầu tiên, train set S tạo ra model.
+First, the train set S creates the model.
+
+21
+00:01:32,100 --> 00:01:36,300
+Sau đó, model sinh ra output y ở test time.
+Then the model produces output y at test time.
+
+22
+00:01:36,300 --> 00:01:42,600
+Cuối cùng, output y được so sánh với từng item trong search set.
+Finally, output y is compared with every item in the search set.
+
+23
+00:01:42,600 --> 00:01:46,600
+Mỗi item nhận một score.
+Each item receives a score.
+
+24
+00:01:46,600 --> 00:01:51,900
+Ta sắp xếp các item theo score đó, và lấy những item đứng đầu làm evidence.
+We rank the items by that score and take the top ones as evidence.
+
+25
+00:01:51,900 --> 00:01:54,490
+Trong ví dụ này, z2 là bằng chứng mạnh nhất, z4 đứng tiếp theo.
+In this example, z2 is the strongest evidence, followed by z4.
+
+26
+00:01:54,490 --> 00:01:59,000
+Một cách triển khai quen thuộc là Information Retrieval.
+A familiar implementation is Information Retrieval.
+
+27
+00:01:59,000 --> 00:02:04,800
+Ta đưa output và các chunk trong corpus vào cùng một embedding space.
+We place the output and corpus chunks in the same embedding space.
+
+28
+00:02:04,800 --> 00:02:10,200
+Những chunk nằm gần output nhất sẽ được xem là top evidence.
+The chunks nearest to the output are treated as top evidence.
+
+29
+00:02:10,200 --> 00:02:16,670
+Đây là lý do retrieval-based attribution rất hữu ích khi corpus lớn và cần tìm nhanh.
+This is why retrieval-based attribution is useful
+when the corpus is large and search must be fast.
+
+30
+00:02:16,670 --> 00:02:20,000
+Nhưng cần nhớ giới hạn.
+But we need to remember the limitation.
+
+31
+00:02:20,000 --> 00:02:25,600
+Evidence hỗ trợ output không đồng nghĩa với causal claim.
+Evidence that supports an output is not the same as a causal claim.
+
+32
+00:02:25,600 --> 00:02:28,500
+Và cũng không tự động cho ta fair credit.
+And it does not automatically give us fair credit.
+
+33
+00:02:28,500 --> 00:02:30,310
+Muốn phân bổ credit một cách nguyên tắc, ta sẽ chuyển sang Game-theoretic Attribution.
+To allocate credit more principledly, we move to Game-theoretic Attribution.

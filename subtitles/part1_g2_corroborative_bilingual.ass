@@ -1,0 +1,48 @@
+[Script Info]
+Title: Part 1 G2 - Corroborative Attribution Bilingual Subtitles
+ScriptType: v4.00+
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+YCbCr Matrix: TV.709
+PlayResX: 1920
+PlayResY: 1080
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: BilingualBox,Arial,42,&H00FFFFFF,&H000000FF,&H00171717,&H88000000,-1,0,0,0,100,100,0,0,3,14,0,2,150,150,56,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.00,0:00:04.40,BilingualBox,,0,0,0,,{\fs48\b1}Trong phần này, ta đi vào Corroborative Attribution.\N{\fs34\b0}In this section, we move into Corroborative Attribution.
+Dialogue: 0,0:00:04.40,0:00:08.80,BilingualBox,,0,0,0,,{\fs48\b1}Ở đây, câu hỏi không phải là: data nào đã gây ra output.\N{\fs34\b0}Here, the question is not: which data caused the output.
+Dialogue: 0,0:00:08.80,0:00:14.34,BilingualBox,,0,0,0,,{\fs46\b1}Câu hỏi trước tiên là: có bằng chứng nào trong dữ liệu làm output này đáng tin hơn không?\N{\fs32\b0}The first question is: what evidence in the data makes this output more trustworthy?
+Dialogue: 0,0:00:14.34,0:00:19.60,BilingualBox,,0,0,0,,{\fs48\b1}Hãy tưởng tượng model vừa sinh ra một claim, hoặc một đoạn generation.\N{\fs34\b0}Imagine the model has just produced a claim, or a generated passage.
+Dialogue: 0,0:00:19.60,0:00:25.00,BilingualBox,,0,0,0,,{\fs46\b1}Ta quét qua một corpus cho trước: doc A, doc B, doc C, và nhiều đoạn khác.\N{\fs32\b0}We scan a given corpus: doc A, doc B, doc C, and many other chunks.
+Dialogue: 0,0:00:25.00,0:00:29.10,BilingualBox,,0,0,0,,{\fs48\b1}Một vài đoạn chỉ là nhiễu.\N{\fs34\b0}Some chunks are only noise.
+Dialogue: 0,0:00:29.10,0:00:32.50,BilingualBox,,0,0,0,,{\fs48\b1}Nhưng một vài đoạn lại có nội dung rất gần với output.\N{\fs34\b0}But some chunks are very close to the output.
+Dialogue: 0,0:00:32.50,0:00:37.75,BilingualBox,,0,0,0,,{\fs46\b1}Những đoạn đó được kéo ra như các evidence candidates: ứng viên bằng chứng cho output hiện tại.\N{\fs32\b0}Those chunks are pulled out as evidence candidates for the current output.
+Dialogue: 0,0:00:37.75,0:00:42.10,BilingualBox,,0,0,0,,{\fs48\b1}Góc nhìn này xuất hiện trong nhiều use case thực tế.\N{\fs34\b0}This lens appears in many real-world use cases.
+Dialogue: 0,0:00:42.10,0:00:47.40,BilingualBox,,0,0,0,,{\fs46\b1}Với citation, ta muốn biết câu trả lời của LLM được hỗ trợ bởi nguồn nào.\N{\fs32\b0}For citation, we want to know which sources support the LLM answer.
+Dialogue: 0,0:00:47.40,0:00:53.20,BilingualBox,,0,0,0,,{\fs46\b1}Với copyright detection, ta muốn biết output có quá giống một đoạn trong dữ liệu gốc hay không.\N{\fs32\b0}For copyright detection, we ask whether the output is too similar to original data.
+Dialogue: 0,0:00:53.20,0:00:59.92,BilingualBox,,0,0,0,,{\fs46\b1}Dù mục tiêu khác nhau, cấu trúc chung vẫn là: từ output, tìm dữ liệu liên quan nhất.\N{\fs32\b0}Even with different goals, the structure is the same: from output, find the most related data.
+Dialogue: 0,0:00:59.92,0:01:03.90,BilingualBox,,0,0,0,,{\fs48\b1}Ta có thể viết ý tưởng đó bằng một score.\N{\fs34\b0}We can write this idea as a score.
+Dialogue: 0,0:01:03.90,0:01:08.10,BilingualBox,,0,0,0,,{\fs48\b1}Với một input x, model sinh ra output y.\N{\fs34\b0}Given an input x, the model produces output y.
+Dialogue: 0,0:01:08.10,0:01:13.50,BilingualBox,,0,0,0,,{\fs48\b1}Với một item z trong corpus, ta tính một similarity score.\N{\fs34\b0}For an item z in the corpus, we compute a similarity score.
+Dialogue: 0,0:01:13.50,0:01:17.00,BilingualBox,,0,0,0,,{\fs48\b1}Nếu score cao, z corroborate tốt cho output.\N{\fs34\b0}If the score is high, z corroborates the output well.
+Dialogue: 0,0:01:17.00,0:01:20.10,BilingualBox,,0,0,0,,{\fs48\b1}Nói cách khác, z là bằng chứng mạnh hơn.\N{\fs34\b0}In other words, z is stronger evidence.
+Dialogue: 0,0:01:20.10,0:01:23.80,BilingualBox,,0,0,0,,{\fs46\b1}Điểm quan trọng là: relation ở đây là sự tương đồng hoặc hỗ trợ, không phải quan hệ nhân quả.\N{\fs32\b0}The key point is: this relation is similarity or support, not causality.
+Dialogue: 0,0:01:23.80,0:01:27.30,BilingualBox,,0,0,0,,{\fs48\b1}Pipeline đầy đủ có ba bước.\N{\fs34\b0}The full pipeline has three steps.
+Dialogue: 0,0:01:27.30,0:01:32.10,BilingualBox,,0,0,0,,{\fs48\b1}Đầu tiên, train set S tạo ra model.\N{\fs34\b0}First, the train set S creates the model.
+Dialogue: 0,0:01:32.10,0:01:36.30,BilingualBox,,0,0,0,,{\fs48\b1}Sau đó, model sinh ra output y ở test time.\N{\fs34\b0}Then the model produces output y at test time.
+Dialogue: 0,0:01:36.30,0:01:42.60,BilingualBox,,0,0,0,,{\fs48\b1}Cuối cùng, output y được so sánh với từng item trong search set.\N{\fs34\b0}Finally, output y is compared with every item in the search set.
+Dialogue: 0,0:01:42.60,0:01:46.60,BilingualBox,,0,0,0,,{\fs48\b1}Mỗi item nhận một score.\N{\fs34\b0}Each item receives a score.
+Dialogue: 0,0:01:46.60,0:01:51.90,BilingualBox,,0,0,0,,{\fs46\b1}Ta sắp xếp các item theo score đó, và lấy những item đứng đầu làm evidence.\N{\fs32\b0}We rank the items by that score and take the top ones as evidence.
+Dialogue: 0,0:01:51.90,0:01:54.49,BilingualBox,,0,0,0,,{\fs48\b1}Trong ví dụ này, z2 là bằng chứng mạnh nhất, z4 đứng tiếp theo.\N{\fs34\b0}In this example, z2 is the strongest evidence, followed by z4.
+Dialogue: 0,0:01:54.49,0:01:59.00,BilingualBox,,0,0,0,,{\fs48\b1}Một cách triển khai quen thuộc là Information Retrieval.\N{\fs34\b0}A familiar implementation is Information Retrieval.
+Dialogue: 0,0:01:59.00,0:02:04.80,BilingualBox,,0,0,0,,{\fs48\b1}Ta đưa output và các chunk trong corpus vào cùng một embedding space.\N{\fs34\b0}We place the output and corpus chunks in the same embedding space.
+Dialogue: 0,0:02:04.80,0:02:10.20,BilingualBox,,0,0,0,,{\fs48\b1}Những chunk nằm gần output nhất sẽ được xem là top evidence.\N{\fs34\b0}The chunks nearest to the output are treated as top evidence.
+Dialogue: 0,0:02:10.20,0:02:16.67,BilingualBox,,0,0,0,,{\fs46\b1}Đây là lý do retrieval-based attribution rất hữu ích khi corpus lớn và cần tìm nhanh.\N{\fs32\b0}This is why retrieval-based attribution is useful when the corpus is large and search must be fast.
+Dialogue: 0,0:02:16.67,0:02:20.00,BilingualBox,,0,0,0,,{\fs48\b1}Nhưng cần nhớ giới hạn.\N{\fs34\b0}But we need to remember the limitation.
+Dialogue: 0,0:02:20.00,0:02:25.60,BilingualBox,,0,0,0,,{\fs48\b1}Evidence hỗ trợ output không đồng nghĩa với causal claim.\N{\fs34\b0}Evidence that supports an output is not the same as a causal claim.
+Dialogue: 0,0:02:25.60,0:02:28.50,BilingualBox,,0,0,0,,{\fs48\b1}Và cũng không tự động cho ta fair credit.\N{\fs34\b0}And it does not automatically give us fair credit.
+Dialogue: 0,0:02:28.50,0:02:30.31,BilingualBox,,0,0,0,,{\fs46\b1}Muốn phân bổ credit một cách nguyên tắc, ta sẽ chuyển sang Game-theoretic Attribution.\N{\fs32\b0}To allocate credit more principledly, we move to Game-theoretic Attribution.

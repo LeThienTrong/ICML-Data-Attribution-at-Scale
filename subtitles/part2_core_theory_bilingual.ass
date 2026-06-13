@@ -1,0 +1,270 @@
+[Script Info]
+ScriptType: v4.00+
+ScaledBorderAndShadow: yes
+PlayResX: 1920
+PlayResY: 1080
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: BilingualBox, Arial, 44, &H00FFFFFF, &H00FFFFFF, &H00000000, &H99000000, 0, 0, 0, 0, 100, 100, 0, 0, 3, 8, 0, 2, 110, 110, 62, 1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.00,0:00:03.62,BilingualBox,,0,0,0,,{\fs48}Ở Part I, ta đã có ba lens để nhìn data attribution.\N{\fs34}In Part I, we had three lenses for data attribution.
+Dialogue: 0,0:00:03.62,0:00:08.47,BilingualBox,,0,0,0,,{\fs48}Corroborative attribution hỏi: output này được hỗ trợ bởi evidence nào?\N{\fs34}Corroborative attribution asks: what evidence supports this output?
+Dialogue: 0,0:00:08.47,0:00:13.72,BilingualBox,,0,0,0,,{\fs48}Game-theoretic attribution hỏi: nếu nhiều data point cùng tạo ra một utility,\N{\fs34}Game-theoretic attribution asks: if many data points create one utility,
+Dialogue: 0,0:00:13.72,0:00:15.69,BilingualBox,,0,0,0,,{\fs48}credit nên được chia ra sao?\N{\fs34}how should credit be divided?
+Dialogue: 0,0:00:15.69,0:00:20.61,BilingualBox,,0,0,0,,{\fs48}Predictive attribution hỏi một câu khác: nếu training data thay đổi,\N{\fs34}Predictive attribution asks a different question: if training data changes,
+Dialogue: 0,0:00:20.61,0:00:23.13,BilingualBox,,0,0,0,,{\fs48}model behavior sẽ thay đổi như thế nào?\N{\fs34}how will model behavior change?
+Dialogue: 0,0:00:23.13,0:00:25.83,BilingualBox,,0,0,0,,{\fs48}Part II bắt đầu từ câu hỏi thứ ba này.\N{\fs34}Part II starts from this third question.
+Dialogue: 0,0:00:25.83,0:00:28.02,BilingualBox,,0,0,0,,{\fs48}Lý do là, nếu không có theory,\N{\fs34}The reason is that without theory,
+Dialogue: 0,0:00:28.02,0:00:34.25,BilingualBox,,0,0,0,,{\fs48}một attribution score rất dễ trở thành một con số nghe có vẻ hợp lý nhưng khó kiểm chứng.\N{\fs34}an attribution score can easily become a plausible-sounding number that is hard to verify.
+Dialogue: 0,0:00:34.25,0:00:39.30,BilingualBox,,0,0,0,,{\fs48}Ta có thể nói một data point "quan trọng", nhưng quan trọng theo nghĩa nào?\N{\fs34}We can say a data point is "important", but important in what sense?
+Dialogue: 0,0:00:39.30,0:00:40.92,BilingualBox,,0,0,0,,{\fs48}Nó làm loss giảm?\N{\fs34}Does it reduce loss?
+Dialogue: 0,0:00:40.92,0:00:43.42,BilingualBox,,0,0,0,,{\fs48}Nó làm một test example đổi nhãn?\N{\fs34}Does it flip the label of a test example?
+Dialogue: 0,0:00:43.42,0:00:47.80,BilingualBox,,0,0,0,,{\fs48}Nó giúp accuracy tổng thể, hay chỉ giúp một nhóm dữ liệu nhỏ?\N{\fs34}Does it improve overall accuracy, or only help a small data group?
+Dialogue: 0,0:00:47.80,0:00:53.42,BilingualBox,,0,0,0,,{\fs48}Và nếu ta thật sự bỏ nó ra khỏi training set, chuyện dự đoán kia có xảy ra không?\N{\fs34}And if we actually remove it from the training set, does that prediction happen?
+Dialogue: 0,0:00:53.42,0:00:58.40,BilingualBox,,0,0,0,,{\fs48}Vì vậy, trong phần này, ta sẽ biến trực giác thành một bài toán rõ ràng hơn:\N{\fs34}So in this part, we will turn intuition into a clearer problem:
+Dialogue: 0,0:00:58.40,0:01:03.78,BilingualBox,,0,0,0,,{\fs48}training data đi vào learning algorithm như thế nào, thay đổi data nghĩa là gì,\N{\fs34}how training data enters the learning algorithm, what changing data means,
+Dialogue: 0,0:01:03.78,0:01:09.80,BilingualBox,,0,0,0,,{\fs48}và làm sao dự đoán counterfactual behavior mà không cần train lại model từ đầu quá nhiều\N{\fs34}and how to predict counterfactual behavior without too much retraining from scratch
+Dialogue: 0,0:01:09.80,0:01:11.41,BilingualBox,,0,0,0,,{\fs48}lần.\N{\fs34}times.
+Dialogue: 0,0:01:11.41,0:01:16.60,BilingualBox,,0,0,0,,{\fs48}Một điểm đáng chú ý là: phần theory này không bắt đầu từ deep learning.\N{\fs34}One notable point is: this theory does not start from deep learning.
+Dialogue: 0,0:01:16.60,0:01:19.59,BilingualBox,,0,0,0,,{\fs48}Nó có một statistical analog khá lâu đời.\N{\fs34}It has a fairly old statistical analog.
+Dialogue: 0,0:01:19.59,0:01:26.25,BilingualBox,,0,0,0,,{\fs48}Trong thống kê, người ta đã quan tâm từ rất sớm đến câu hỏi: nếu dataset thay đổi một chút,\N{\fs34}In statistics, people have long cared about the question: if a dataset changes slightly,
+Dialogue: 0,0:01:26.25,0:01:28.48,BilingualBox,,0,0,0,,{\fs48}estimator sẽ thay đổi thế nào?\N{\fs34}how will the estimator change?
+Dialogue: 0,0:01:28.48,0:01:34.64,BilingualBox,,0,0,0,,{\fs48}Ví dụ, nếu ta bỏ một quan sát ra khỏi regression, coefficient có đổi nhiều không?\N{\fs34}For example, if we remove one observation from regression, do coefficients change much?
+Dialogue: 0,0:01:34.64,0:01:39.84,BilingualBox,,0,0,0,,{\fs48}Nếu ta tăng trọng số của một sample, estimate có dịch đáng kể không?\N{\fs34}If we increase the weight of a sample, does the estimate shift noticeably?
+Dialogue: 0,0:01:39.84,0:01:45.48,BilingualBox,,0,0,0,,{\fs48}Nếu một điểm dữ liệu là outlier, nó có làm kết luận thống kê bị kéo lệch không?\N{\fs34}If a data point is an outlier, does it skew the statistical conclusion?
+Dialogue: 0,0:01:45.48,0:01:52.12,BilingualBox,,0,0,0,,{\fs48}Những câu hỏi đó dẫn đến các ý tưởng như leave-one-out diagnostics, infinitesimal jackknife,\N{\fs34}Those questions led to ideas like leave-one-out diagnostics, infinitesimal jackknife,
+Dialogue: 0,0:01:52.12,0:01:53.85,BilingualBox,,0,0,0,,{\fs48}và influence functions.\N{\fs34}and influence functions.
+Dialogue: 0,0:01:53.85,0:01:56.45,BilingualBox,,0,0,0,,{\fs48}Nhưng có một khác biệt quan trọng.\N{\fs34}But there is an important difference.
+Dialogue: 0,0:01:56.45,0:02:01.95,BilingualBox,,0,0,0,,{\fs48}Trong statistical analog cổ điển, target thường là parameter prediction:\N{\fs34}In the classical statistical analog, the target is often parameter prediction:
+Dialogue: 0,0:02:01.95,0:02:05.67,BilingualBox,,0,0,0,,{\fs48}ta dự đoán parameter của estimator thay đổi ra sao.\N{\fs34}we predict how the estimator's parameter changes.
+Dialogue: 0,0:02:05.67,0:02:11.50,BilingualBox,,0,0,0,,{\fs48}Còn trong data attribution cho machine learning, nhất là predictive attribution,\N{\fs34}In data attribution for machine learning, especially predictive attribution,
+Dialogue: 0,0:02:11.50,0:02:18.22,BilingualBox,,0,0,0,,{\fs48}target mà người dùng thật sự quan tâm thường là behavior prediction: output, loss, accuracy,\N{\fs34}the target users really care about is often behavior prediction: output, loss, accuracy,
+Dialogue: 0,0:02:18.22,0:02:23.06,BilingualBox,,0,0,0,,{\fs48}robustness, fairness, hoặc một metric cụ thể trên downstream task.\N{\fs34}robustness, fairness, or a specific metric on a downstream task.
+Dialogue: 0,0:02:23.06,0:02:27.54,BilingualBox,,0,0,0,,{\fs48}Parameter vẫn quan trọng, nhưng nó chỉ là tầng trung gian.\N{\fs34}Parameters still matter, but they are only an intermediate layer.
+Dialogue: 0,0:02:27.54,0:02:33.37,BilingualBox,,0,0,0,,{\fs48}Nếu parameter đổi rất nhiều mà behavior không đổi, người dùng có thể không quan tâm.\N{\fs34}If parameters change a lot but behavior does not, users may not care.
+Dialogue: 0,0:02:33.37,0:02:35.09,BilingualBox,,0,0,0,,{\fs48}Ngược lại,\N{\fs34}Conversely,
+Dialogue: 0,0:02:35.09,0:02:41.58,BilingualBox,,0,0,0,,{\fs48}một thay đổi parameter nhỏ nhưng làm một nhóm prediction đổi mạnh lại rất quan trọng.\N{\fs34}a small parameter change that strongly changes a group of predictions can be very important.
+Dialogue: 0,0:02:41.58,0:02:46.21,BilingualBox,,0,0,0,,{\fs48}Vì vậy, khi ta mượn theory từ thống kê sang ML, ta phải nhớ:\N{\fs34}So when we borrow theory from statistics into ML, we must remember:
+Dialogue: 0,0:02:46.21,0:02:49.56,BilingualBox,,0,0,0,,{\fs48}công thức có thể bắt đầu trong parameter space,\N{\fs34}the formulas may begin in parameter space,
+Dialogue: 0,0:02:49.56,0:02:53.63,BilingualBox,,0,0,0,,{\fs48}nhưng mục tiêu cuối cùng của video này là model behavior.\N{\fs34}but the final goal of this video is model behavior.
+Dialogue: 0,0:02:53.63,0:02:56.55,BilingualBox,,0,0,0,,{\fs48}Framework đầu tiên là M-estimation.\N{\fs34}The first framework is M-estimation.
+Dialogue: 0,0:02:56.55,0:03:00.40,BilingualBox,,0,0,0,,{\fs48}Nghe tên hơi khô, nhưng ý tưởng rất tự nhiên:\N{\fs34}The name sounds dry, but the idea is very natural:
+Dialogue: 0,0:03:00.40,0:03:04.74,BilingualBox,,0,0,0,,{\fs48}ta xem model như nghiệm của một bài toán tối ưu.\N{\fs34}we view the model as the solution of an optimization problem.
+Dialogue: 0,0:03:04.74,0:03:08.20,BilingualBox,,0,0,0,,{\fs48}Mỗi training sample tạo ra một loss riêng.\N{\fs34}Each training sample creates its own loss.
+Dialogue: 0,0:03:08.20,0:03:12.53,BilingualBox,,0,0,0,,{\fs48}Nếu sample đó được dùng đầy đủ, trọng số của nó là một.\N{\fs34}If that sample is fully used, its weight is one.
+Dialogue: 0,0:03:12.53,0:03:16.48,BilingualBox,,0,0,0,,{\fs48}Nếu sample đó bị bỏ ra, trọng số của nó là không.\N{\fs34}If that sample is removed, its weight is zero.
+Dialogue: 0,0:03:16.48,0:03:22.48,BilingualBox,,0,0,0,,{\fs48}Nếu ta chỉ muốn giảm ảnh hưởng của nó, trọng số nằm giữa không và một.\N{\fs34}If we only want to reduce its influence, the weight lies between zero and one.
+Dialogue: 0,0:03:22.48,0:03:28.40,BilingualBox,,0,0,0,,{\fs48}Và nếu ta muốn upweight một nhóm dữ liệu, trọng số có thể lớn hơn một.\N{\fs34}And if we want to upweight a data group, the weight can be larger than one.
+Dialogue: 0,0:03:28.40,0:03:34.22,BilingualBox,,0,0,0,,{\fs48}Nói cách khác, thay vì chỉ nghĩ training set là một danh sách cố định,\N{\fs34}In other words, instead of thinking of the training set as a fixed list,
+Dialogue: 0,0:03:34.22,0:03:37.69,BilingualBox,,0,0,0,,{\fs48}ta gắn với nó một weight vector, gọi là w.\N{\fs34}we attach to it a weight vector, called w.
+Dialogue: 0,0:03:37.69,0:03:41.30,BilingualBox,,0,0,0,,{\fs48}Khi w thay đổi, bài toán tối ưu thay đổi.\N{\fs34}When w changes, the optimization problem changes.
+Dialogue: 0,0:03:41.30,0:03:46.28,BilingualBox,,0,0,0,,{\fs48}Khi bài toán tối ưu thay đổi, nghiệm của nó cũng thay đổi.\N{\fs34}When the optimization problem changes, its solution also changes.
+Dialogue: 0,0:03:46.28,0:03:52.21,BilingualBox,,0,0,0,,{\fs48}Nghiệm đó là parameter của model, thường được ký hiệu là theta star của w.\N{\fs34}That solution is the model parameter, often denoted theta star of w.
+Dialogue: 0,0:03:52.21,0:03:54.52,BilingualBox,,0,0,0,,{\fs48}Đây là bước rất quan trọng:\N{\fs34}This is a very important step:
+Dialogue: 0,0:03:54.52,0:04:01.38,BilingualBox,,0,0,0,,{\fs48}data attribution không còn là một cảm giác mơ hồ về "data nào giống output nào".\N{\fs34}data attribution is no longer a vague feeling about "which data looks like which output".
+Dialogue: 0,0:04:01.38,0:04:08.31,BilingualBox,,0,0,0,,{\fs48}Nó trở thành câu hỏi về một hàm: nếu ta thay đổi weight vector w, theta star của w,\N{\fs34}It becomes a question about a function: if we change weight vector w, theta star of w,
+Dialogue: 0,0:04:08.31,0:04:11.74,BilingualBox,,0,0,0,,{\fs48}và behavior của model, sẽ thay đổi ra sao?\N{\fs34}and model behavior, how will they change?
+Dialogue: 0,0:04:11.74,0:04:17.59,BilingualBox,,0,0,0,,{\fs48}Trường hợp đơn giản nhất của weight vector là leave-one-out, thường viết tắt là LOO.\N{\fs34}The simplest case of a weight vector is leave-one-out, often abbreviated LOO.
+Dialogue: 0,0:04:17.59,0:04:20.25,BilingualBox,,0,0,0,,{\fs48}Ta train model trên toàn bộ dataset.\N{\fs34}We train the model on the full dataset.
+Dialogue: 0,0:04:20.25,0:04:25.93,BilingualBox,,0,0,0,,{\fs48}Sau đó ta bỏ một data point, ví dụ z j, train lại model, rồi so sánh kết quả.\N{\fs34}Then we remove one data point, say z j, retrain the model, and compare the results.
+Dialogue: 0,0:04:25.93,0:04:29.07,BilingualBox,,0,0,0,,{\fs48}Nếu bỏ z j làm behavior thay đổi rất mạnh,\N{\fs34}If removing z j changes behavior very strongly,
+Dialogue: 0,0:04:29.07,0:04:33.04,BilingualBox,,0,0,0,,{\fs48}ta nói z j có ảnh hưởng lớn đối với behavior đang xét.\N{\fs34}we say z j has a large effect on the behavior under study.
+Dialogue: 0,0:04:33.04,0:04:37.79,BilingualBox,,0,0,0,,{\fs48}Nếu bỏ z j mà model gần như không đổi, thì influence của nó nhỏ.\N{\fs34}If removing z j barely changes the model, then its influence is small.
+Dialogue: 0,0:04:37.79,0:04:41.40,BilingualBox,,0,0,0,,{\fs48}Điểm hay của leave-one-out là nó rất rõ ràng.\N{\fs34}The nice thing about leave-one-out is that it is very clear.
+Dialogue: 0,0:04:41.40,0:04:44.79,BilingualBox,,0,0,0,,{\fs48}Nó không hỏi "data này nhìn có liên quan không".\N{\fs34}It does not ask "does this data look related?"
+Dialogue: 0,0:04:44.79,0:04:50.43,BilingualBox,,0,0,0,,{\fs48}Nó hỏi một counterfactual cụ thể: trong một thế giới gần giống thế giới hiện tại,\N{\fs34}It asks a concrete counterfactual: in a world almost like the current one,
+Dialogue: 0,0:04:50.43,0:04:53.13,BilingualBox,,0,0,0,,{\fs48}nhưng thiếu z j, model sẽ ra sao?\N{\fs34}but without z j, what would the model be like?
+Dialogue: 0,0:04:53.13,0:04:56.34,BilingualBox,,0,0,0,,{\fs48}Nhưng điểm dở cũng rất rõ: nó quá đắt.\N{\fs34}But the downside is also very clear: it is too expensive.
+Dialogue: 0,0:04:56.34,0:05:02.55,BilingualBox,,0,0,0,,{\fs48}Nếu dataset có một triệu điểm, exact leave-one-out nghĩa là train lại gần một triệu lần.\N{\fs34}With one million data points, exact leave-one-out means almost one million retrains.
+Dialogue: 0,0:05:02.55,0:05:08.14,BilingualBox,,0,0,0,,{\fs48}Với deep learning, đặc biệt là foundation models, chuyện này gần như không thể.\N{\fs34}With deep learning, especially foundation models, this is almost impossible.
+Dialogue: 0,0:05:08.14,0:05:13.75,BilingualBox,,0,0,0,,{\fs48}Vì vậy LOO đóng vai trò giống một mục tiêu vàng: dễ hiểu, đúng về mặt định nghĩa,\N{\fs34}So LOO acts like a gold target: easy to understand, definitionally clean,
+Dialogue: 0,0:05:13.75,0:05:16.20,BilingualBox,,0,0,0,,{\fs48}nhưng quá tốn để tính trực tiếp.\N{\fs34}but too expensive to compute directly.
+Dialogue: 0,0:05:16.20,0:05:21.72,BilingualBox,,0,0,0,,{\fs48}Các phương pháp theory trong Part II chủ yếu là những cách xấp xỉ mục tiêu này.\N{\fs34}The theory methods in Part II are mainly ways to approximate this target.
+Dialogue: 0,0:05:21.72,0:05:27.93,BilingualBox,,0,0,0,,{\fs48}Để thấy vì sao theory có ích, tutorial bắt đầu với ví dụ dễ nhất: linear regression.\N{\fs34}To see why theory helps, the tutorial starts with the easiest example: linear regression.
+Dialogue: 0,0:05:27.93,0:05:30.05,BilingualBox,,0,0,0,,{\fs48}Ta có các điểm dữ liệu x và y.\N{\fs34}We have data points x and y.
+Dialogue: 0,0:05:30.05,0:05:34.76,BilingualBox,,0,0,0,,{\fs48}Model là một đường thẳng, hoặc tổng quát hơn là một linear predictor.\N{\fs34}The model is a line, or more generally a linear predictor.
+Dialogue: 0,0:05:34.76,0:05:40.36,BilingualBox,,0,0,0,,{\fs48}Loss là squared error: dự đoán lệch y bao nhiêu thì bị phạt theo bình phương.\N{\fs34}The loss is squared error: prediction error from y is penalized quadratically.
+Dialogue: 0,0:05:40.36,0:05:44.24,BilingualBox,,0,0,0,,{\fs48}Trong trường hợp này, nghiệm tối ưu có công thức đóng.\N{\fs34}In this case, the optimum has a closed-form solution.
+Dialogue: 0,0:05:44.24,0:05:49.26,BilingualBox,,0,0,0,,{\fs48}Nghĩa là ta không cần tưởng tượng training như một hộp đen hoàn toàn.\N{\fs34}That means we do not need to imagine training as a complete black box.
+Dialogue: 0,0:05:49.26,0:05:53.98,BilingualBox,,0,0,0,,{\fs48}Ta có thể viết nghiệm theta star trực tiếp bằng ma trận của dữ liệu.\N{\fs34}We can write theta star directly using matrices of the data.
+Dialogue: 0,0:05:53.98,0:05:59.01,BilingualBox,,0,0,0,,{\fs48}Và khi bỏ một điểm dữ liệu ra, ta cũng không cần train lại từ đầu.\N{\fs34}And when removing a data point, we also do not need to retrain from scratch.
+Dialogue: 0,0:05:59.01,0:06:01.46,BilingualBox,,0,0,0,,{\fs48}Nhờ công thức Sherman-Morrison,\N{\fs34}Thanks to the Sherman-Morrison formula,
+Dialogue: 0,0:06:01.46,0:06:07.32,BilingualBox,,0,0,0,,{\fs48}việc "xóa một điểm" có thể được xem như một cập nhật hạng một trên ma trận ban đầu.\N{\fs34}"deleting a point" can be viewed as a rank-one update to the original matrix.
+Dialogue: 0,0:06:07.32,0:06:12.37,BilingualBox,,0,0,0,,{\fs48}Chi tiết đại số có thể hơi nặng, nhưng thông điệp trực giác rất đẹp:\N{\fs34}The algebraic details can be a bit heavy, but the intuition is beautiful:
+Dialogue: 0,0:06:12.37,0:06:18.46,BilingualBox,,0,0,0,,{\fs48}nếu learning problem đủ có cấu trúc, ảnh hưởng của một data point không phải phép màu.\N{\fs34}if the learning problem has enough structure, a data point's effect is not magic.
+Dialogue: 0,0:06:18.46,0:06:23.84,BilingualBox,,0,0,0,,{\fs48}Nó là thứ có thể tính được từ nghiệm hiện tại và geometry của dữ liệu.\N{\fs34}It is something computable from the current solution and the geometry of the data.
+Dialogue: 0,0:06:23.84,0:06:29.44,BilingualBox,,0,0,0,,{\fs48}Trong linear regression, công thức leave-one-out cho ta hai mảnh trực giác rất quan trọng:\N{\fs34}In linear regression, the leave-one-out formula gives two key intuitions:
+Dialogue: 0,0:06:29.44,0:06:30.99,BilingualBox,,0,0,0,,{\fs48}residual và leverage.\N{\fs34}residual and leverage.
+Dialogue: 0,0:06:30.99,0:06:34.00,BilingualBox,,0,0,0,,{\fs48}Residual là lỗi còn lại của data point đó.\N{\fs34}Residual is the remaining error of that data point.
+Dialogue: 0,0:06:34.00,0:06:37.28,BilingualBox,,0,0,0,,{\fs48}Nếu model hiện tại dự đoán rất sai ở điểm z j,\N{\fs34}If the current model predicts very poorly at point z j,
+Dialogue: 0,0:06:37.28,0:06:40.86,BilingualBox,,0,0,0,,{\fs48}điểm đó đang tạo áp lực kéo đường fit về phía nó.\N{\fs34}that point is applying pressure to pull the fit toward itself.
+Dialogue: 0,0:06:40.86,0:06:43.21,BilingualBox,,0,0,0,,{\fs48}Nhưng residual lớn thôi chưa đủ.\N{\fs34}But a large residual alone is not enough.
+Dialogue: 0,0:06:43.21,0:06:44.76,BilingualBox,,0,0,0,,{\fs48}Ta còn cần leverage.\N{\fs34}We also need leverage.
+Dialogue: 0,0:06:44.76,0:06:49.60,BilingualBox,,0,0,0,,{\fs48}Leverage nói rằng điểm dữ liệu đó nằm ở vị trí hình học nhạy cảm đến đâu.\N{\fs34}Leverage says how geometrically sensitive that data point's position is.
+Dialogue: 0,0:06:49.60,0:06:55.20,BilingualBox,,0,0,0,,{\fs48}Một điểm nằm trong vùng rất đông dữ liệu có thể có residual lớn, nhưng khi bỏ nó ra,\N{\fs34}A point inside a very dense data region may have a large residual, but when removed,
+Dialogue: 0,0:06:55.20,0:06:58.47,BilingualBox,,0,0,0,,{\fs48}các điểm xung quanh vẫn giữ đường fit gần như cũ.\N{\fs34}nearby points still keep the fit almost the same.
+Dialogue: 0,0:06:58.47,0:07:03.85,BilingualBox,,0,0,0,,{\fs48}Ngược lại, một điểm nằm ở rìa phân phối có thể kéo đường fit mạnh hơn nhiều,\N{\fs34}In contrast, a point on the edge of the distribution can pull the fit much more strongly,
+Dialogue: 0,0:07:03.85,0:07:07.70,BilingualBox,,0,0,0,,{\fs48}vì nó đại diện cho một hướng mà dataset ít hỗ trợ.\N{\fs34}because it represents a direction that the dataset supports only weakly.
+Dialogue: 0,0:07:07.70,0:07:11.11,BilingualBox,,0,0,0,,{\fs48}Vậy influence không chỉ là "điểm nào có loss cao".\N{\fs34}So influence is not just "which point has high loss".
+Dialogue: 0,0:07:11.11,0:07:15.97,BilingualBox,,0,0,0,,{\fs48}Influence là sự kết hợp giữa lỗi cục bộ và hình học toàn cục của bài toán.\N{\fs34}Influence combines local error with the global geometry of the problem.
+Dialogue: 0,0:07:15.97,0:07:18.55,BilingualBox,,0,0,0,,{\fs48}Đây là hạt giống của công thức sau này:\N{\fs34}This is the seed of the later formula:
+Dialogue: 0,0:07:18.55,0:07:24.21,BilingualBox,,0,0,0,,{\fs48}gradient cho ta hướng mà một sample muốn kéo model đi, còn Hessian cho ta độ cong,\N{\fs34}the gradient gives the direction a sample wants to pull the model, while the Hessian gives
+Dialogue: 0,0:07:24.21,0:07:28.02,BilingualBox,,0,0,0,,{\fs48}hay độ cứng, của loss landscape đối với hướng đó.\N{\fs34}the curvature, or stiffness, of the loss landscape along that direction.
+Dialogue: 0,0:07:28.02,0:07:32.11,BilingualBox,,0,0,0,,{\fs48}Linear regression là trường hợp quá đẹp vì có công thức đóng.\N{\fs34}Linear regression is a beautiful case because it has a closed form.
+Dialogue: 0,0:07:32.11,0:07:37.20,BilingualBox,,0,0,0,,{\fs48}Nhưng nhiều model tuyến tính khác, như logistic regression, không may mắn như vậy.\N{\fs34}But many other linear models, like logistic regression, are not so lucky.
+Dialogue: 0,0:07:37.20,0:07:41.23,BilingualBox,,0,0,0,,{\fs48}Với logistic regression, model vẫn tuyến tính theo feature,\N{\fs34}With logistic regression, the model is still linear in the features,
+Dialogue: 0,0:07:41.23,0:07:44.22,BilingualBox,,0,0,0,,{\fs48}nhưng loss không còn là một quadratic đơn giản.\N{\fs34}but the loss is no longer a simple quadratic.
+Dialogue: 0,0:07:44.22,0:07:47.33,BilingualBox,,0,0,0,,{\fs48}Ta thường phải dùng optimization để tìm nghiệm.\N{\fs34}We usually need optimization to find the solution.
+Dialogue: 0,0:07:47.33,0:07:51.60,BilingualBox,,0,0,0,,{\fs48}Ý tưởng tiếp theo là: nếu không có công thức đóng cho toàn bộ loss,\N{\fs34}The next idea is: if there is no closed form for the whole loss,
+Dialogue: 0,0:07:51.60,0:07:55.13,BilingualBox,,0,0,0,,{\fs48}ta tạo một xấp xỉ quadratic quanh nghiệm hiện tại.\N{\fs34}we build a quadratic approximation around the current solution.
+Dialogue: 0,0:07:55.13,0:07:58.34,BilingualBox,,0,0,0,,{\fs48}Hãy tưởng tượng loss landscape như một bề mặt cong.\N{\fs34}Imagine the loss landscape as a curved surface.
+Dialogue: 0,0:07:58.34,0:08:00.98,BilingualBox,,0,0,0,,{\fs48}Gần điểm tối ưu, ta phóng to bề mặt đó.\N{\fs34}Near the optimum, we zoom into that surface.
+Dialogue: 0,0:08:00.98,0:08:06.51,BilingualBox,,0,0,0,,{\fs48}Trong một vùng nhỏ, nó có thể được thay bằng một cái bát parabol: có độ dốc, có độ cong,\N{\fs34}In a small region, it can be replaced by a parabolic bowl: with slope, curvature,
+Dialogue: 0,0:08:06.51,0:08:08.01,BilingualBox,,0,0,0,,{\fs48}và có đáy xấp xỉ.\N{\fs34}and an approximate bottom.
+Dialogue: 0,0:08:08.01,0:08:11.99,BilingualBox,,0,0,0,,{\fs48}Khi bỏ một sample ra, đáy thật của loss mới có thể dịch đi.\N{\fs34}When removing a sample, the true bottom of the new loss may shift.
+Dialogue: 0,0:08:11.99,0:08:14.78,BilingualBox,,0,0,0,,{\fs48}Ta không tìm đáy thật bằng cách train lại.\N{\fs34}We do not find the true bottom by retraining.
+Dialogue: 0,0:08:14.78,0:08:18.93,BilingualBox,,0,0,0,,{\fs48}Ta dùng quadratic approximation để dự đoán đáy mới nằm ở đâu.\N{\fs34}We use the quadratic approximation to predict where the new bottom is.
+Dialogue: 0,0:08:18.93,0:08:23.41,BilingualBox,,0,0,0,,{\fs48}Với các generalized linear models, ý tưởng này thường hoạt động khá tốt.\N{\fs34}For generalized linear models, this idea often works quite well.
+Dialogue: 0,0:08:23.41,0:08:28.77,BilingualBox,,0,0,0,,{\fs48}Nó cũng cho thấy một motif sẽ lặp lại nhiều lần: thay vì chạy lại learning algorithm,\N{\fs34}It also reveals a recurring motif: instead of rerunning the learning algorithm,
+Dialogue: 0,0:08:28.77,0:08:33.46,BilingualBox,,0,0,0,,{\fs48}ta dùng local geometry quanh model đã train để dự đoán counterfactual.\N{\fs34}we use local geometry around the trained model to predict the counterfactual.
+Dialogue: 0,0:08:33.46,0:08:37.64,BilingualBox,,0,0,0,,{\fs48}Bây giờ ta đi từ linear model sang M-estimation tổng quát hơn.\N{\fs34}Now we move from linear models to more general M-estimation.
+Dialogue: 0,0:08:37.64,0:08:41.32,BilingualBox,,0,0,0,,{\fs48}Ở nghiệm tối ưu, tổng gradient có trọng số bằng không.\N{\fs34}At the optimum, the weighted sum of gradients is zero.
+Dialogue: 0,0:08:41.32,0:08:47.24,BilingualBox,,0,0,0,,{\fs48}Đây là optimality condition: nếu model đã ở đáy loss, các lực kéo từ dữ liệu cân bằng nhau.\N{\fs34}This is the optimality condition: at the loss bottom, data forces are balanced.
+Dialogue: 0,0:08:47.24,0:08:52.87,BilingualBox,,0,0,0,,{\fs48}Ta muốn biết: nếu tăng nhẹ weight của sample j, nghiệm theta sẽ dịch theo hướng nào?\N{\fs34}We want to know: if sample j's weight increases slightly, where does theta move?
+Dialogue: 0,0:08:52.87,0:08:57.45,BilingualBox,,0,0,0,,{\fs48}Để trả lời, ta đạo hàm optimality condition theo weight w j.\N{\fs34}To answer, we differentiate the optimality condition with respect to weight w j.
+Dialogue: 0,0:08:57.45,0:09:03.25,BilingualBox,,0,0,0,,{\fs48}Kết quả là một công thức rất nổi tiếng trong robust statistics và sau này được dùng nhiều\N{\fs34}The result is a very famous formula in robust statistics and later widely used
+Dialogue: 0,0:09:03.25,0:09:04.84,BilingualBox,,0,0,0,,{\fs48}trong machine learning:\N{\fs34}in machine learning:
+Dialogue: 0,0:09:04.84,0:09:06.42,BilingualBox,,0,0,0,,{\fs48}influence function.\N{\fs34}the influence function.
+Dialogue: 0,0:09:06.42,0:09:10.16,BilingualBox,,0,0,0,,{\fs48}Lúc này, những giả định toán học bắt đầu quan trọng.\N{\fs34}At this point, the mathematical assumptions start to matter.
+Dialogue: 0,0:09:10.16,0:09:15.42,BilingualBox,,0,0,0,,{\fs48}Để đạo hàm này sạch, ta thường muốn loss đủ trơn, nghiệm tối ưu là duy nhất,\N{\fs34}To make this derivative clean, we usually want a smooth loss, a unique optimum,
+Dialogue: 0,0:09:15.42,0:09:19.28,BilingualBox,,0,0,0,,{\fs48}và quanh nghiệm đó loss landscape có độ cong ổn định.\N{\fs34}and stable curvature of the loss landscape around that optimum.
+Dialogue: 0,0:09:19.28,0:09:24.95,BilingualBox,,0,0,0,,{\fs48}Trong ngôn ngữ thường gặp của tutorial, đó là các điều kiện như strong convexity,\N{\fs34}In the language often used in the tutorial, these are conditions like strong convexity,
+Dialogue: 0,0:09:24.95,0:09:27.82,BilingualBox,,0,0,0,,{\fs48}unique minimizer, và Hessian khả nghịch.\N{\fs34}a unique minimizer, and an invertible Hessian.
+Dialogue: 0,0:09:27.82,0:09:33.10,BilingualBox,,0,0,0,,{\fs48}Những điều kiện này làm cho bản đồ từ data weights sang parameter trở nên ổn định:\N{\fs34}These conditions make the map from data weights to parameters stable:
+Dialogue: 0,0:09:33.10,0:09:37.73,BilingualBox,,0,0,0,,{\fs48}thay đổi w một chút thì theta star cũng dịch một cách có thể dự đoán.\N{\fs34}change w a little, and theta star also moves in a predictable way.
+Dialogue: 0,0:09:37.73,0:09:39.82,BilingualBox,,0,0,0,,{\fs48}Ở mức trực giác, công thức nói:\N{\fs34}Intuitively, the formula says:
+Dialogue: 0,0:09:39.82,0:09:45.94,BilingualBox,,0,0,0,,{\fs48}Ảnh hưởng của sample j lên parameter xấp xỉ bằng âm inverse Hessian nhân với gradient của\N{\fs34}The effect of sample j on the parameter is approximately negative inverse Hessian times the
+Dialogue: 0,0:09:45.94,0:09:47.53,BilingualBox,,0,0,0,,{\fs48}sample j.\N{\fs34}gradient of sample j.
+Dialogue: 0,0:09:47.53,0:09:51.60,BilingualBox,,0,0,0,,{\fs48}Gradient của sample j là hướng mà sample đó kéo model.\N{\fs34}The gradient of sample j is the direction that sample pulls the model.
+Dialogue: 0,0:09:51.60,0:09:54.19,BilingualBox,,0,0,0,,{\fs48}Hessian là độ cong của tổng loss,\N{\fs34}The Hessian is the curvature of the total loss,
+Dialogue: 0,0:09:54.19,0:09:59.30,BilingualBox,,0,0,0,,{\fs48}cho biết loss landscape chống lại chuyển động theo từng hướng mạnh hay yếu.\N{\fs34}showing how strongly the loss landscape resists movement in each direction.
+Dialogue: 0,0:09:59.30,0:10:02.03,BilingualBox,,0,0,0,,{\fs48}Inverse Hessian giống như bộ chuyển đổi:\N{\fs34}The inverse Hessian is like a converter:
+Dialogue: 0,0:10:02.03,0:10:07.52,BilingualBox,,0,0,0,,{\fs48}nó biến lực kéo cục bộ của một sample thành dịch chuyển dự đoán của parameter.\N{\fs34}it turns a sample's local pulling force into the predicted movement of the parameter.
+Dialogue: 0,0:10:07.52,0:10:12.12,BilingualBox,,0,0,0,,{\fs48}Đây là lý do influence function hấp dẫn: chỉ cần train một model,\N{\fs34}This is why influence functions are appealing: after training one model,
+Dialogue: 0,0:10:12.12,0:10:15.09,BilingualBox,,0,0,0,,{\fs48}tính gradient và Hessian-vector products,\N{\fs34}computing gradients and Hessian-vector products,
+Dialogue: 0,0:10:15.09,0:10:20.72,BilingualBox,,0,0,0,,{\fs48}ta có thể ước lượng ảnh hưởng của nhiều training points mà không train lại từng lần.\N{\fs34}we can estimate the effect of many training points without retraining each time.
+Dialogue: 0,0:10:20.72,0:10:24.64,BilingualBox,,0,0,0,,{\fs48}Nhưng hãy để ý: ở đây ta mới dự đoán parameter thay đổi.\N{\fs34}But notice: so far, we have only predicted parameter change.
+Dialogue: 0,0:10:24.64,0:10:27.33,BilingualBox,,0,0,0,,{\fs48}Đó chưa phải toàn bộ data attribution.\N{\fs34}That is not the whole of data attribution.
+Dialogue: 0,0:10:27.33,0:10:32.97,BilingualBox,,0,0,0,,{\fs48}Đây là chỗ ta phải phân biệt thật rõ parameter prediction và behavior prediction.\N{\fs34}This is where we must clearly distinguish parameter prediction from behavior prediction.
+Dialogue: 0,0:10:32.97,0:10:37.56,BilingualBox,,0,0,0,,{\fs48}Influence function cổ điển thường bắt đầu bằng parameter prediction:\N{\fs34}Classical influence functions often start with parameter prediction:
+Dialogue: 0,0:10:37.56,0:10:41.38,BilingualBox,,0,0,0,,{\fs48}nếu weight của sample j thay đổi, theta sẽ dịch bao nhiêu?\N{\fs34}if sample j's weight changes, how far does theta move?
+Dialogue: 0,0:10:41.38,0:10:46.33,BilingualBox,,0,0,0,,{\fs48}Nhưng data attribution thường không chỉ quan tâm parameter thay đổi ra sao.\N{\fs34}But data attribution usually does not only care how parameters change.
+Dialogue: 0,0:10:46.33,0:10:50.94,BilingualBox,,0,0,0,,{\fs48}Người dùng không nhìn trực tiếp vào hàng triệu hoặc hàng tỷ parameter.\N{\fs34}Users do not directly look at millions or billions of parameters.
+Dialogue: 0,0:10:50.94,0:10:56.28,BilingualBox,,0,0,0,,{\fs48}Họ quan tâm behavior: prediction cho một input cụ thể, loss trên một benchmark,\N{\fs34}They care about behavior: prediction for a specific input, loss on a benchmark,
+Dialogue: 0,0:10:56.28,0:11:01.57,BilingualBox,,0,0,0,,{\fs48}accuracy trên một nhóm dữ liệu, hoặc xác suất model tạo một output nào đó.\N{\fs34}accuracy on a data group, or the probability that the model produces a certain output.
+Dialogue: 0,0:11:01.57,0:11:04.13,BilingualBox,,0,0,0,,{\fs48}Vì vậy ta cần thêm một bước chain rule.\N{\fs34}So we need one more chain-rule step.
+Dialogue: 0,0:11:04.13,0:11:10.03,BilingualBox,,0,0,0,,{\fs48}Nếu sample j làm parameter dịch một chút, và behavior mà ta đo cũng thay đổi theo parameter,\N{\fs34}If sample j moves parameters slightly, and measured behavior changes with them,
+Dialogue: 0,0:11:10.03,0:11:14.39,BilingualBox,,0,0,0,,{\fs48}thì ảnh hưởng của sample j lên behavior bằng hai phần ghép lại:\N{\fs34}then sample j's effect on behavior is the combination of two parts:
+Dialogue: 0,0:11:14.39,0:11:20.07,BilingualBox,,0,0,0,,{\fs48}sample j kéo parameter theo hướng nào, và behavior nhạy với hướng parameter đó đến đâu.\N{\fs34}how sample j pulls parameters, and how sensitive behavior is to that direction.
+Dialogue: 0,0:11:20.07,0:11:25.60,BilingualBox,,0,0,0,,{\fs48}Trong paper của Koh và Liang, influence functions được dùng theo đúng tinh thần này:\N{\fs34}In Koh and Liang's paper, influence functions are used exactly in this spirit:
+Dialogue: 0,0:11:25.60,0:11:30.50,BilingualBox,,0,0,0,,{\fs48}trace một prediction của black-box model ngược qua learning algorithm,\N{\fs34}trace a black-box model's prediction backward through the learning algorithm,
+Dialogue: 0,0:11:30.50,0:11:34.32,BilingualBox,,0,0,0,,{\fs48}rồi về các training examples có trách nhiệm lớn nhất.\N{\fs34}back to the training examples with the greatest responsibility.
+Dialogue: 0,0:11:34.32,0:11:40.28,BilingualBox,,0,0,0,,{\fs48}Đây là cây cầu giữa theory và câu hỏi thực tế: không chỉ "sample này ảnh hưởng lên theta",\N{\fs34}This is the bridge between theory and practice: not just "this sample affects theta",
+Dialogue: 0,0:11:40.28,0:11:45.62,BilingualBox,,0,0,0,,{\fs48}mà là "sample này làm output, loss, hoặc decision của model thay đổi bao nhiêu".\N{\fs34}but "how much does this sample change the model's output, loss, or decision".
+Dialogue: 0,0:11:45.62,0:11:51.50,BilingualBox,,0,0,0,,{\fs48}Vì vậy, khi xem một attribution method, ta nên hỏi: nó đang dự đoán parameter change,\N{\fs34}So when looking at an attribution method, we should ask: is it predicting parameter change,
+Dialogue: 0,0:11:51.50,0:11:53.07,BilingualBox,,0,0,0,,{\fs48}hay behavior change?\N{\fs34}or behavior change?
+Dialogue: 0,0:11:53.07,0:11:55.06,BilingualBox,,0,0,0,,{\fs48}Nếu chỉ có parameter change,\N{\fs34}If it only has parameter change,
+Dialogue: 0,0:11:55.06,0:12:00.24,BilingualBox,,0,0,0,,{\fs48}nó có chứng minh được rằng behavior ta quan tâm cũng thay đổi đúng như vậy không?\N{\fs34}can it prove that the behavior we care about also changes as claimed?
+Dialogue: 0,0:12:00.24,0:12:04.56,BilingualBox,,0,0,0,,{\fs48}Influence function rất đẹp, nhưng nó không phải cây đũa thần.\N{\fs34}Influence functions are beautiful, but they are not a magic wand.
+Dialogue: 0,0:12:04.56,0:12:07.02,BilingualBox,,0,0,0,,{\fs48}Nó dựa trên một số giả định mạnh.\N{\fs34}They rely on several strong assumptions.
+Dialogue: 0,0:12:07.02,0:12:11.73,BilingualBox,,0,0,0,,{\fs48}Thứ nhất, loss nên đủ trơn để gradient và Hessian có ý nghĩa.\N{\fs34}First, the loss should be smooth enough for gradients and Hessians to make sense.
+Dialogue: 0,0:12:11.73,0:12:17.28,BilingualBox,,0,0,0,,{\fs48}Thứ hai, bài toán thường được phân tích trong setting convex hoặc strongly convex,\N{\fs34}Second, the problem is often analyzed in a convex or strongly convex setting,
+Dialogue: 0,0:12:17.28,0:12:23.03,BilingualBox,,0,0,0,,{\fs48}nơi nghiệm tối ưu là duy nhất, tức là có unique minimizer, và Hessian khả nghịch.\N{\fs34}where the optimum is unique, meaning a unique minimizer, and the Hessian is invertible.
+Dialogue: 0,0:12:23.03,0:12:27.37,BilingualBox,,0,0,0,,{\fs48}Thứ ba, model được giả định là đã train đến gần nghiệm tối ưu.\N{\fs34}Third, the model is assumed to have trained close to an optimum.
+Dialogue: 0,0:12:27.37,0:12:29.67,BilingualBox,,0,0,0,,{\fs48}Thứ tư, perturbation phải nhỏ.\N{\fs34}Fourth, the perturbation must be small.
+Dialogue: 0,0:12:29.67,0:12:34.10,BilingualBox,,0,0,0,,{\fs48}Upweight một điểm một chút thì Taylor approximation hợp lý hơn.\N{\fs34}Slightly upweighting a point fits the Taylor approximation better.
+Dialogue: 0,0:12:34.10,0:12:39.24,BilingualBox,,0,0,0,,{\fs48}Bỏ hẳn một điểm ra khỏi dataset là thay đổi lớn hơn, nên xấp xỉ có thể sai.\N{\fs34}Fully removing a point is a larger change, so the approximation can fail.
+Dialogue: 0,0:12:39.24,0:12:42.89,BilingualBox,,0,0,0,,{\fs48}Modern deep learning phá nhiều giả định trong số đó.\N{\fs34}Modern deep learning breaks many of those assumptions.
+Dialogue: 0,0:12:42.89,0:12:44.50,BilingualBox,,0,0,0,,{\fs48}Loss không convex.\N{\fs34}The loss is not convex.
+Dialogue: 0,0:12:44.50,0:12:46.11,BilingualBox,,0,0,0,,{\fs48}Training có randomness.\N{\fs34}Training has randomness.
+Dialogue: 0,0:12:46.11,0:12:50.02,BilingualBox,,0,0,0,,{\fs48}Model không nhất thiết hội tụ đến một nghiệm duy nhất.\N{\fs34}The model does not necessarily converge to a unique solution.
+Dialogue: 0,0:12:50.02,0:12:53.50,BilingualBox,,0,0,0,,{\fs48}Hessian có thể suy biến hoặc cực kỳ khó xử lý.\N{\fs34}The Hessian may be degenerate or extremely hard to handle.
+Dialogue: 0,0:12:53.50,0:12:59.37,BilingualBox,,0,0,0,,{\fs48}Và với model lớn, chỉ cần định nghĩa "counterfactual retraining" cũng đã phức tạp:\N{\fs34}And with large models, simply defining "counterfactual retraining" is already complicated:
+Dialogue: 0,0:12:59.37,0:13:03.91,BilingualBox,,0,0,0,,{\fs48}cùng dataset nhưng seed khác, checkpoint khác, schedule khác,\N{\fs34}same dataset but different seed, different checkpoint, different schedule,
+Dialogue: 0,0:13:03.91,0:13:06.48,BilingualBox,,0,0,0,,{\fs48}model có thể đi đến behavior khác.\N{\fs34}the model may arrive at different behavior.
+Dialogue: 0,0:13:06.48,0:13:12.20,BilingualBox,,0,0,0,,{\fs48}Vì vậy, influence function là một approximation có giá trị, nhưng phải được kiểm chứng.\N{\fs34}So influence functions are a valuable approximation, but must be validated.
+Dialogue: 0,0:13:12.20,0:13:17.40,BilingualBox,,0,0,0,,{\fs48}Đặc biệt với deep neural networks, nếu thiếu convexity, thiếu convergence,\N{\fs34}Especially with deep neural networks, if convexity or convergence is missing,
+Dialogue: 0,0:13:17.40,0:13:21.96,BilingualBox,,0,0,0,,{\fs48}hoặc Hessian không ổn định, ta không nên mặc định rằng IF reliable.\N{\fs34}or the Hessian is unstable, we should not assume IF is reliable.
+Dialogue: 0,0:13:21.96,0:13:26.56,BilingualBox,,0,0,0,,{\fs48}Nó cho ta ngôn ngữ và baseline mạnh, không phải bằng chứng cuối cùng.\N{\fs34}It gives us a language and a strong baseline, not final proof.
+Dialogue: 0,0:13:26.56,0:13:30.93,BilingualBox,,0,0,0,,{\fs48}Đây chính là lý do Part III phải nói về scaling và evaluation.\N{\fs34}This is exactly why Part III must discuss scaling and evaluation.
+Dialogue: 0,0:13:30.93,0:13:34.88,BilingualBox,,0,0,0,,{\fs48}Với DNN, câu hỏi không chỉ là "công thức có đẹp không",\N{\fs34}With DNNs, the question is not only "is the formula elegant",
+Dialogue: 0,0:13:34.88,0:13:39.14,BilingualBox,,0,0,0,,{\fs48}mà là "nó có dự đoán đúng counterfactual behavior thật không?"\N{\fs34}but "does it truly predict the real counterfactual behavior?"
+Dialogue: 0,0:13:39.14,0:13:41.59,BilingualBox,,0,0,0,,{\fs48}Datamodels đi theo một hướng khác.\N{\fs34}Datamodels take a different route.
+Dialogue: 0,0:13:41.59,0:13:45.75,BilingualBox,,0,0,0,,{\fs48}Thay vì bắt đầu từ local geometry của một model đã train,\N{\fs34}Instead of starting from local geometry of a trained model,
+Dialogue: 0,0:13:45.75,0:13:50.55,BilingualBox,,0,0,0,,{\fs48}datamodeling xem toàn bộ learning process như một hàm cần học.\N{\fs34}datamodeling treats the whole learning process as a function to be learned.
+Dialogue: 0,0:13:50.55,0:13:52.77,BilingualBox,,0,0,0,,{\fs48}Input là một subset indicator:\N{\fs34}The input is a subset indicator:
+Dialogue: 0,0:13:52.77,0:13:58.29,BilingualBox,,0,0,0,,{\fs48}data point nào có mặt trong training subset thì vị trí tương ứng là một,\N{\fs34}if a data point is present in the training subset, its corresponding position is one,
+Dialogue: 0,0:13:58.29,0:14:01.06,BilingualBox,,0,0,0,,{\fs48}data point nào bị loại thì là không.\N{\fs34}and if a data point is removed, it is zero.
+Dialogue: 0,0:14:01.06,0:14:05.78,BilingualBox,,0,0,0,,{\fs48}Output là behavior đo được sau khi train model trên subset đó:\N{\fs34}The output is measured behavior after training the model on that subset:
+Dialogue: 0,0:14:05.78,0:14:11.65,BilingualBox,,0,0,0,,{\fs48}có thể là loss trên một test example, accuracy trên một group, xác suất của một class,\N{\fs34}it may be loss on a test example, accuracy on a group, class probability,
+Dialogue: 0,0:14:11.65,0:14:13.32,BilingualBox,,0,0,0,,{\fs48}hoặc một score cụ thể.\N{\fs34}or a specific score.
+Dialogue: 0,0:14:13.32,0:14:16.93,BilingualBox,,0,0,0,,{\fs48}Để học datamodel, ta tạo nhiều training subsets.\N{\fs34}To learn a datamodel, we create many training subsets.
+Dialogue: 0,0:14:16.93,0:14:22.69,BilingualBox,,0,0,0,,{\fs48}Với mỗi subset, ta chạy learning algorithm, đo behavior, rồi lưu lại một cặp:\N{\fs34}For each subset, we run the learning algorithm, measure behavior, and store one pair:
+Dialogue: 0,0:14:22.69,0:14:24.80,BilingualBox,,0,0,0,,{\fs48}subset indicator và behavior.\N{\fs34}subset indicator and behavior.
+Dialogue: 0,0:14:24.80,0:14:29.90,BilingualBox,,0,0,0,,{\fs48}Sau đó ta train một surrogate để dự đoán behavior từ subset indicator.\N{\fs34}Then we train a surrogate to predict behavior from the subset indicator.
+Dialogue: 0,0:14:29.90,0:14:33.63,BilingualBox,,0,0,0,,{\fs48}Nếu surrogate này học tốt, ta có một công cụ mạnh:\N{\fs34}If this surrogate learns well, we have a powerful tool:
+Dialogue: 0,0:14:33.63,0:14:39.36,BilingualBox,,0,0,0,,{\fs48}thay vì train lại model chính cho mọi counterfactual mới, ta hỏi datamodel.\N{\fs34}instead of retraining the main model for every new counterfactual, we ask the datamodel.
+Dialogue: 0,0:14:39.36,0:14:45.97,BilingualBox,,0,0,0,,{\fs48}Nó không thay thế model chính; nó mô hình hóa quan hệ giữa data và behavior của model chính.\N{\fs34}It does not replace the main model; it models the relation between data and model behavior.
+Dialogue: 0,0:14:45.97,0:14:52.13,BilingualBox,,0,0,0,,{\fs48}Nói ngắn gọn, datamodeling biến data attribution thành một bài toán supervised learning.\N{\fs34}In short, datamodeling turns data attribution into a supervised learning problem.
+Dialogue: 0,0:14:52.13,0:14:56.28,BilingualBox,,0,0,0,,{\fs48}Phiên bản đơn giản và quan trọng nhất là linear datamodel.\N{\fs34}The simplest and most important version is the linear datamodel.
+Dialogue: 0,0:14:56.28,0:14:57.88,BilingualBox,,0,0,0,,{\fs48}Trong linear datamodel,\N{\fs34}In a linear datamodel,
+Dialogue: 0,0:14:57.88,0:15:03.88,BilingualBox,,0,0,0,,{\fs48}prediction của behavior bằng một bias term cộng với tổng contribution của các data point\N{\fs34}the behavior prediction equals a bias term plus the total contribution of data points
+Dialogue: 0,0:15:03.88,0:15:05.60,BilingualBox,,0,0,0,,{\fs48}được include trong subset.\N{\fs34}included in the subset.
+Dialogue: 0,0:15:05.60,0:15:11.67,BilingualBox,,0,0,0,,{\fs48}Nếu data point i có mặt, indicator m i bằng một, coefficient tau i được cộng vào prediction.\N{\fs34}If data point i is present, indicator m i is one, and coefficient tau i is added.
+Dialogue: 0,0:15:11.67,0:15:17.00,BilingualBox,,0,0,0,,{\fs48}Nếu data point i vắng mặt, indicator bằng không, contribution đó biến mất.\N{\fs34}If data point i is absent, the indicator is zero, and that contribution disappears.
+Dialogue: 0,0:15:17.00,0:15:23.06,BilingualBox,,0,0,0,,{\fs48}Vì vậy tau i có thể được đọc như attribution coefficient của data point i đối với behavior\N{\fs34}So tau i can be read as the attribution coefficient of data point i for the behavior
+Dialogue: 0,0:15:23.06,0:15:24.66,BilingualBox,,0,0,0,,{\fs48}đang xét.\N{\fs34}under consideration.
+Dialogue: 0,0:15:24.66,0:15:30.80,BilingualBox,,0,0,0,,{\fs48}Điểm thú vị là linear datamodel có họ hàng với cả influence functions lẫn game-theoretic\N{\fs34}The interesting point is that linear datamodels are related to both influence functions and
+Dialogue: 0,0:15:30.80,0:15:32.41,BilingualBox,,0,0,0,,{\fs48}attribution.\N{\fs34}game-theoretic attribution.
+Dialogue: 0,0:15:32.41,0:15:38.13,BilingualBox,,0,0,0,,{\fs48}Nó giống influence function ở chỗ mỗi data point có một effect tuyến tính, cố định.\N{\fs34}It resembles influence functions because each data point has a fixed linear effect.
+Dialogue: 0,0:15:38.13,0:15:44.16,BilingualBox,,0,0,0,,{\fs48}Nó cũng gợi nhớ Shapley ở chỗ ta nhìn nhiều subsets và hỏi contribution của từng điểm.\N{\fs34}It also recalls Shapley because we examine many subsets and ask each point's contribution.
+Dialogue: 0,0:15:44.16,0:15:49.63,BilingualBox,,0,0,0,,{\fs48}Nhưng mục tiêu ở đây khác: mục tiêu chính không phải thỏa mãn axioms công bằng,\N{\fs34}But the goal here is different: the main goal is not satisfying fairness axioms,
+Dialogue: 0,0:15:49.63,0:15:52.92,BilingualBox,,0,0,0,,{\fs48}mà là predict counterfactual behavior thật tốt.\N{\fs34}but predicting true counterfactual behavior well.
+Dialogue: 0,0:15:52.92,0:15:55.60,BilingualBox,,0,0,0,,{\fs48}Vì thế evaluation cực kỳ quan trọng.\N{\fs34}Therefore evaluation is extremely important.
+Dialogue: 0,0:15:55.60,0:16:00.04,BilingualBox,,0,0,0,,{\fs48}Ta phải giữ lại một số subsets chưa dùng để train datamodel.\N{\fs34}We must hold out some subsets that were not used to train the datamodel.
+Dialogue: 0,0:16:00.04,0:16:05.72,BilingualBox,,0,0,0,,{\fs48}Với các subsets đó, ta thật sự train hoặc evaluate model chính, lấy behavior thật,\N{\fs34}For those subsets, we actually train or evaluate the main model, get true behavior,
+Dialogue: 0,0:16:05.72,0:16:09.10,BilingualBox,,0,0,0,,{\fs48}rồi so sánh với behavior datamodel dự đoán.\N{\fs34}and compare it with the behavior predicted by the datamodel.
+Dialogue: 0,0:16:09.10,0:16:14.02,BilingualBox,,0,0,0,,{\fs48}Nếu predicted-vs-actual khớp tốt, attribution score đáng tin hơn.\N{\fs34}If predicted versus actual matches well, the attribution score is more trustworthy.
+Dialogue: 0,0:16:14.02,0:16:19.55,BilingualBox,,0,0,0,,{\fs48}Nếu correlation thấp, hoặc datamodel dự đoán sai direction của counterfactual,\N{\fs34}If correlation is low, or the datamodel predicts the wrong counterfactual direction,
+Dialogue: 0,0:16:19.55,0:16:22.10,BilingualBox,,0,0,0,,{\fs48}thì score nhìn đẹp cũng chưa đủ.\N{\fs34}then a nice-looking score is still not enough.
+Dialogue: 0,0:16:22.10,0:16:24.03,BilingualBox,,0,0,0,,{\fs48}Trong predictive attribution,\N{\fs34}In predictive attribution,
+Dialogue: 0,0:16:24.03,0:16:30.24,BilingualBox,,0,0,0,,{\fs48}một score chỉ có nghĩa khi nó giúp dự đoán điều sẽ xảy ra trong những counterfactual chưa\N{\fs34}a score is meaningful only when it helps predict what will happen in counterfactuals not yet
+Dialogue: 0,0:16:30.24,0:16:31.84,BilingualBox,,0,0,0,,{\fs48}thấy.\N{\fs34}seen.
+Dialogue: 0,0:16:31.84,0:16:34.58,BilingualBox,,0,0,0,,{\fs48}Ta có thể tóm tắt Part II bằng năm ý.\N{\fs34}We can summarize Part II in five points.
+Dialogue: 0,0:16:34.58,0:16:39.72,BilingualBox,,0,0,0,,{\fs48}Một: predictive attribution có gốc gần với một statistical analog lâu đời:\N{\fs34}One: predictive attribution is rooted in an old statistical analog:
+Dialogue: 0,0:16:39.72,0:16:45.10,BilingualBox,,0,0,0,,{\fs48}dự đoán estimator thay đổi thế nào khi dữ liệu hoặc trọng số dữ liệu thay đổi.\N{\fs34}predicting how an estimator changes when data or data weights change.
+Dialogue: 0,0:16:45.10,0:16:49.12,BilingualBox,,0,0,0,,{\fs48}Hai: M-estimation cho ta một ngôn ngữ để nói về data.\N{\fs34}Two: M-estimation gives us a language for talking about data.
+Dialogue: 0,0:16:49.12,0:16:55.18,BilingualBox,,0,0,0,,{\fs48}Data không chỉ có mặt hoặc vắng mặt; nó đi vào learning algorithm qua weight vector.\N{\fs34}Data is not just present or absent; it enters the learning algorithm through weights.
+Dialogue: 0,0:16:55.18,0:16:58.79,BilingualBox,,0,0,0,,{\fs48}Ba: leave-one-out là counterfactual cơ bản nhất.\N{\fs34}Three: leave-one-out is the most basic counterfactual.
+Dialogue: 0,0:16:58.79,0:17:03.86,BilingualBox,,0,0,0,,{\fs48}Nó rõ ràng, dễ hiểu, nhưng quá đắt nếu tính chính xác ở scale lớn.\N{\fs34}It is clear and intuitive, but too expensive to compute exactly at large scale.
+Dialogue: 0,0:17:03.86,0:17:05.54,BilingualBox,,0,0,0,,{\fs48}Bốn:\N{\fs34}Four:
+Dialogue: 0,0:17:05.54,0:17:12.05,BilingualBox,,0,0,0,,{\fs48}influence functions dùng gradient và Hessian để xấp xỉ điều gì sẽ xảy ra khi weight của một\N{\fs34}influence functions use gradients and Hessians to approximate changes when the weight of a
+Dialogue: 0,0:17:12.05,0:17:13.72,BilingualBox,,0,0,0,,{\fs48}sample thay đổi.\N{\fs34}sample changes.
+Dialogue: 0,0:17:13.72,0:17:17.95,BilingualBox,,0,0,0,,{\fs48}Đây là cầu nối từ robust statistics sang machine learning,\N{\fs34}This is a bridge from robust statistics to machine learning,
+Dialogue: 0,0:17:17.95,0:17:24.09,BilingualBox,,0,0,0,,{\fs48}nhưng đi kèm các giả định mạnh như strong convexity, unique minimizer, convergence,\N{\fs34}but it comes with strong assumptions like strong convexity, unique minimizer, convergence,
+Dialogue: 0,0:17:24.09,0:17:25.76,BilingualBox,,0,0,0,,{\fs48}và Hessian ổn định.\N{\fs34}and a stable Hessian.
+Dialogue: 0,0:17:25.76,0:17:30.91,BilingualBox,,0,0,0,,{\fs48}Năm: datamodels học trực tiếp map từ subset data sang model behavior.\N{\fs34}Five: datamodels directly learn the map from data subsets to model behavior.
+Dialogue: 0,0:17:30.91,0:17:32.58,BilingualBox,,0,0,0,,{\fs48}Nếu học tốt,\N{\fs34}If they learn well,
+Dialogue: 0,0:17:32.58,0:17:39.07,BilingualBox,,0,0,0,,{\fs48}chúng biến attribution thành một bài toán prediction có thể đánh giá bằng counterfactuals.\N{\fs34}they turn attribution into a prediction problem that can be evaluated with counterfactuals.
+Dialogue: 0,0:17:39.07,0:17:44.20,BilingualBox,,0,0,0,,{\fs48}Điểm chung của tất cả là: attribution không nên chỉ là một ranking đẹp.\N{\fs34}The common point is: attribution should not be only a beautiful ranking.
+Dialogue: 0,0:17:44.20,0:17:50.19,BilingualBox,,0,0,0,,{\fs48}Nó phải trả lời được câu hỏi "nếu data thay đổi, behavior có đổi như dự đoán không?"\N{\fs34}It must answer the question: "if data changes, does behavior change as predicted?"
+Dialogue: 0,0:17:50.19,0:17:52.45,BilingualBox,,0,0,0,,{\fs48}Và đó là nơi Part III bắt đầu.\N{\fs34}And that is where Part III begins.
+Dialogue: 0,0:17:52.45,0:17:55.96,BilingualBox,,0,0,0,,{\fs48}Khi model nhỏ và convex, theory khá sạch.\N{\fs34}When the model is small and convex, the theory is fairly clean.
+Dialogue: 0,0:17:55.96,0:17:59.80,BilingualBox,,0,0,0,,{\fs48}Nhưng modern ML không nhỏ, không convex, và không rẻ.\N{\fs34}But modern ML is not small, not convex, and not cheap.
+Dialogue: 0,0:17:59.80,0:18:06.29,BilingualBox,,0,0,0,,{\fs48}Vậy làm sao scale những ý tưởng này lên deep networks, large datasets, và foundation models?\N{\fs34}So how do we scale these ideas to deep networks, large datasets, and foundation models?
+Dialogue: 0,0:18:06.29,0:18:09.75,BilingualBox,,0,0,0,,{\fs48}Phần tiếp theo sẽ nói về scaling và evaluation:\N{\fs34}The next part will discuss scaling and evaluation:
+Dialogue: 0,0:18:09.75,0:18:14.37,BilingualBox,,0,0,0,,{\fs48}cách các estimator hiện đại cố gắng giữ lại tinh thần của theory,\N{\fs34}how modern estimators try to preserve the spirit of the theory,
+Dialogue: 0,0:18:14.37,0:18:18.97,BilingualBox,,0,0,0,,{\fs48}nhưng sống được trong thế giới messy của modern machine learning.\N{\fs34}while surviving in the messy world of modern machine learning.
